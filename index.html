@@ -1,0 +1,24 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Deck Builder UI</title>
+  <link rel="stylesheet" href="styles.css">
+  <script src="scripts.js" defer></script>
+</head>
+<body>
+  <div class="header">
+    <button onclick="saveDeck()" id="saveButton" class="disabled">Save Deck</button>
+    <button onclick="confirmWipe()">Wipe Deck</button>
+    <div id="deckSummary" class="deck-summary">
+      <div id="totalCards">Cards Selected: 0 / (20–40)</div>
+      <div id="typeBreakdown">⚔️x0 🛡️x0 🧭x0 🎒x0 ☣️x0 🧨x0 ✨x0</div>
+    </div>
+  </div>
+  <div id="deckContainer" class="deck-container"></div>
+  <div class="footer">
+    <button onclick="saveDeck()" id="saveButtonBottom" class="disabled">Save Deck</button>
+    <button onclick="confirmWipe()">Wipe Deck</button>
+  </div>
+</body>
+</html>
