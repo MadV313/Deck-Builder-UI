@@ -1,0 +1,16 @@
+[
+  {
+    "id": 1,
+    "number": "001",
+    "name": "Bandage",
+    "type": "Loot",
+    "image": "images/cards/001_Bandage_Loot.png"
+  },
+  {
+    "id": 2,
+    "number": "002",
+    "name": "Morphine Auto-Injector",
+    "type": "Loot",
+    "image": "images/cards/002_Morphine_Loot.png"
+  }
+]
