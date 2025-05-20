@@ -50,15 +50,33 @@ body {
   margin-top: 20px;
 }
 
+/* 🔲 Outer wrapper: shows rarity border */
+.card-border-wrap {
+  padding: 3px;
+  border: 3px solid gray; /* Default fallback color */
+  border-radius: 10px;
+  box-sizing: border-box;
+  display: inline-block;
+  transition: box-shadow 0.2s ease-in-out, border-color 0.2s ease-in-out;
+  margin: 10px;
+}
+
+/* 🟩 Green glow if selected */
+.card-border-wrap.selected-card {
+  box-shadow: 0 0 12px 3px limegreen;
+  border-color: limegreen !important;
+}
+
+/* Inner card layout */
 .card {
   width: 120px;
   height: 180px;
-  border: 2px solid teal;
-  margin: 10px;
-  text-align: center;
+  border: 2px solid #1b1b1b;
+  border-radius: 6px;
   background-color: #1b1b1b;
-  position: relative;
   overflow: hidden;
+  text-align: center;
+  position: relative;
 }
 
 .card img {
