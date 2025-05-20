@@ -21,40 +21,42 @@ let cardDataMap = {};
 const useMockMode = true;
 
 // 🔄 Choose data source
-const dataSource = useMockMode ? fetch('mock_deckData.json').then(res => res.json()) : fetch('deckData.json').then(res => res.json());
+const dataSource = useMockMode
+  ? fetch('mock_deckData.json').then(res => res.json())
+  : fetch('deckData.json').then(res => res.json());
 
 dataSource.then(cards => {
   cards.sort((a, b) => parseInt(a.card_id) - parseInt(b.card_id));
   cards.forEach(cardData => {
     const borderWrap = document.createElement('div');
     borderWrap.className = 'card-border-wrap';
-    
+
     const card = document.createElement('div');
     card.className = 'card';
-    
+
     const img = document.createElement('img');
     img.src = `images/cards/${cardData.image}`;
     img.alt = cardData.name;
     img.className = 'card-img';
-    
+
     card.appendChild(img);
     borderWrap.appendChild(card);
-    borderWrap.onclick = () => toggleCard(borderWrap, cardData.id, cardData.type);
+    borderWrap.onclick = () => toggleCard(borderWrap, cardData.card_id, cardData.type);
     deckContainer.appendChild(borderWrap);
 
     cardDataMap[cardData.card_id] = cardData;
   });
 });
 
-function toggleCard(card, id, type) {
+function toggleCard(borderWrap, id, type) {
   if (currentDeck.includes(id)) {
     currentDeck = currentDeck.filter(c => c !== id);
     typeCount[type]--;
-    card.classList.remove('selected-card');
+    borderWrap.classList.remove('selected-card');
   } else {
     currentDeck.push(id);
     typeCount[type]++;
-    card.classList.add('selected-card');
+    borderWrap.classList.add('selected-card');
   }
   updateDeckSummary();
   validateDeck();
@@ -62,21 +64,15 @@ function toggleCard(card, id, type) {
 
 function updateDeckSummary() {
   totalCardsDisplay.innerText = `Cards Selected: ${currentDeck.length} / (20–40)`;
-  typeBreakdownDisplay.innerText = `⚔️x${typeCount["Attack"]} 🛡️x${typeCount["Defense"]} 🬭×${typeCount["Tactical"]} 🎒x${typeCount["Loot"]} ☣️x${typeCount["Infected"]} 🫈x${typeCount["Trap"]} ✨x${typeCount["Legendary"]}`;
+  typeBreakdownDisplay.innerText = `⚔️x${typeCount["Attack"]} 🛡️x${typeCount["Defense"]} 🧭x${typeCount["Tactical"]} 🎒x${typeCount["Loot"]} ☣️x${typeCount["Infected"]} 🧨x${typeCount["Trap"]} ✨x${typeCount["Legendary"]}`;
 }
 
 function validateDeck() {
-  if (currentDeck.length >= 20 && currentDeck.length <= 40) {
-    saveButton.classList.remove('disabled');
-    saveButton.classList.add('animate');
-    saveButtonBottom.classList.remove('disabled');
-    saveButtonBottom.classList.add('animate');
-  } else {
-    saveButton.classList.add('disabled');
-    saveButton.classList.remove('animate');
-    saveButtonBottom.classList.add('disabled');
-    saveButtonBottom.classList.remove('animate');
-  }
+  const valid = currentDeck.length >= 20 && currentDeck.length <= 40;
+  [saveButton, saveButtonBottom].forEach(btn => {
+    btn.classList.toggle('disabled', !valid);
+    btn.classList.toggle('animate', valid);
+  });
 }
 
 function saveDeck() {
@@ -91,11 +87,10 @@ function confirmWipe() {
   if (confirm('Are you sure you want to wipe your deck?')) {
     currentDeck = [];
     Object.keys(typeCount).forEach(key => typeCount[key] = 0);
-    document.querySelectorAll('.card').forEach(card => {
-      card.style.borderColor = 'teal';
+    document.querySelectorAll('.card-border-wrap').forEach(card => {
+      card.classList.remove('selected-card');
     });
     updateDeckSummary();
     validateDeck();
   }
 }
-
