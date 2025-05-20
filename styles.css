@@ -69,8 +69,8 @@ body {
 
 /* Inner card layout */
 .card {
-  width: 120px;
-  height: 180px;
+  width: 140px;
+  height: 210px;
   border: 2px solid #1b1b1b;
   border-radius: 6px;
   background-color: #1b1b1b;
@@ -112,5 +112,10 @@ button.animate {
     background-size: cover;
     background-position: top center;
     background-attachment: scroll;
+  }
+
+  .card {
+    width: 160px;
+    height: 240px;
   }
 }
