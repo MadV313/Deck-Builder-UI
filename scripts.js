@@ -26,17 +26,21 @@ const dataSource = useMockMode ? fetch('mock_deckData.json').then(res => res.jso
 dataSource.then(cards => {
   cards.sort((a, b) => parseInt(a.card_id) - parseInt(b.card_id));
   cards.forEach(cardData => {
+    const borderWrap = document.createElement('div');
+    borderWrap.className = 'card-border-wrap';
+    
     const card = document.createElement('div');
     card.className = 'card';
-
+    
     const img = document.createElement('img');
     img.src = `images/cards/${cardData.image}`;
     img.alt = cardData.name;
     img.className = 'card-img';
-
+    
     card.appendChild(img);
-    card.onclick = () => toggleCard(card, cardData.card_id, cardData.type);
-    deckContainer.appendChild(card);
+    borderWrap.appendChild(card);
+    borderWrap.onclick = () => toggleCard(borderWrap, cardData.id, cardData.type);
+    deckContainer.appendChild(borderWrap);
 
     cardDataMap[cardData.card_id] = cardData;
   });
