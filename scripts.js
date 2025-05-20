@@ -17,25 +17,37 @@ const typeBreakdownDisplay = document.getElementById('typeBreakdown');
 
 let cardDataMap = {};
 
-fetch('deckData.json')
-  .then(response => response.json())
-  .then(cards => {
-    cards.forEach(cardData => {
-      const card = document.createElement('div');
-      card.className = 'card';
-      
-      const img = document.createElement('img');
-      img.src = cardData.image;
-      img.alt = cardData.name;
-      img.className = 'card-img';
+// 🔀 Toggle this to true for mock testing, false for real data
+const useMockMode = true;
 
-      card.appendChild(img);
-      card.onclick = () => toggleCard(card, cardData.id, cardData.type);
-      deckContainer.appendChild(card);
+const mockDeck = [
+  { id: "001", name: "Machete", type: "Attack", image: "images/cards/001_Machete_Attack.png" },
+  { id: "032", name: "Ballistic Helmet", type: "Defense", image: "images/cards/032_BallisticHelmet_Defense.png" },
+  { id: "054", name: "Bandage Stack", type: "Loot", image: "images/cards/054_BandageStack_Loot.png" },
+  { id: "106", name: "Tripwire Trap", type: "Trap", image: "images/cards/106_TripwireTrap_Trap.png" },
+  { id: "121", name: "The Agency", type: "Legendary", image: "images/cards/121_TheAgency_Specialty.png" }
+];
 
-      cardDataMap[cardData.id] = cardData;
-    });
+// 🔄 Choose data source
+const dataSource = useMockMode ? Promise.resolve(mockDeck) : fetch('deckData.json').then(res => res.json());
+
+dataSource.then(cards => {
+  cards.forEach(cardData => {
+    const card = document.createElement('div');
+    card.className = 'card';
+    
+    const img = document.createElement('img');
+    img.src = cardData.image;
+    img.alt = cardData.name;
+    img.className = 'card-img';
+
+    card.appendChild(img);
+    card.onclick = () => toggleCard(card, cardData.id, cardData.type);
+    deckContainer.appendChild(card);
+
+    cardDataMap[cardData.id] = cardData;
   });
+});
 
 function toggleCard(card, id, type) {
   if (currentDeck.includes(id)) {
