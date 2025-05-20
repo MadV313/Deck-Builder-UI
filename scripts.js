@@ -20,32 +20,25 @@ let cardDataMap = {};
 // 🔀 Toggle this to true for mock testing, false for real data
 const useMockMode = true;
 
-const mockDeck = [
-  { id: "001", name: "Machete", type: "Attack", image: "images/cards/001_Machete_Attack.png" },
-  { id: "032", name: "Ballistic Helmet", type: "Defense", image: "images/cards/032_BallisticHelmet_Defense.png" },
-  { id: "054", name: "Bandage Stack", type: "Loot", image: "images/cards/054_BandageStack_Loot.png" },
-  { id: "106", name: "Tripwire Trap", type: "Trap", image: "images/cards/106_TripwireTrap_Trap.png" },
-  { id: "121", name: "The Agency", type: "Legendary", image: "images/cards/121_TheAgency_Specialty.png" }
-];
-
 // 🔄 Choose data source
-const dataSource = useMockMode ? Promise.resolve(mockDeck) : fetch('deckData.json').then(res => res.json());
+const dataSource = useMockMode ? fetch('mock_deckData.json').then(res => res.json()) : fetch('deckData.json').then(res => res.json());
 
 dataSource.then(cards => {
+  cards.sort((a, b) => parseInt(a.card_id) - parseInt(b.card_id));
   cards.forEach(cardData => {
     const card = document.createElement('div');
     card.className = 'card';
-    
+
     const img = document.createElement('img');
-    img.src = cardData.image;
+    img.src = `images/cards/${cardData.image}`;
     img.alt = cardData.name;
     img.className = 'card-img';
 
     card.appendChild(img);
-    card.onclick = () => toggleCard(card, cardData.id, cardData.type);
+    card.onclick = () => toggleCard(card, cardData.card_id, cardData.type);
     deckContainer.appendChild(card);
 
-    cardDataMap[cardData.id] = cardData;
+    cardDataMap[cardData.card_id] = cardData;
   });
 });
 
@@ -65,7 +58,7 @@ function toggleCard(card, id, type) {
 
 function updateDeckSummary() {
   totalCardsDisplay.innerText = `Cards Selected: ${currentDeck.length} / (20–40)`;
-  typeBreakdownDisplay.innerText = `⚔️x${typeCount["Attack"]} 🛡️x${typeCount["Defense"]} 🧭x${typeCount["Tactical"]} 🎒x${typeCount["Loot"]} ☣️x${typeCount["Infected"]} 🧨x${typeCount["Trap"]} ✨x${typeCount["Legendary"]}`;
+  typeBreakdownDisplay.innerText = `⚔️x${typeCount["Attack"]} 🛡️x${typeCount["Defense"]} 🬭×${typeCount["Tactical"]} 🎒x${typeCount["Loot"]} ☣️x${typeCount["Infected"]} 🫈x${typeCount["Trap"]} ✨x${typeCount["Legendary"]}`;
 }
 
 function validateDeck() {
@@ -101,3 +94,4 @@ function confirmWipe() {
     validateDeck();
   }
 }
+
