@@ -50,11 +50,11 @@ function toggleCard(card, id, type) {
   if (currentDeck.includes(id)) {
     currentDeck = currentDeck.filter(c => c !== id);
     typeCount[type]--;
-    card.style.borderColor = 'teal';
+    card.classList.remove('selected-card');
   } else {
     currentDeck.push(id);
     typeCount[type]++;
-    card.style.borderColor = 'lime';
+    card.classList.add('selected-card');
   }
   updateDeckSummary();
   validateDeck();
