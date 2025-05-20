@@ -1,2 +1,3 @@
-npm init -y
-npm install express
+"scripts": {
+  "start": "node server.js"
+}
