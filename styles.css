@@ -88,3 +88,12 @@ button.animate {
   from { box-shadow: 0 0 5px teal; }
   to { box-shadow: 0 0 20px teal; }
 }
+
+@media (max-width: 768px) {
+  body {
+    background-size: contain;
+    background-repeat: no-repeat;
+    background-position: center top;
+    background-attachment: scroll;
+  }
+}
