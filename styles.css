@@ -2,7 +2,6 @@ body {
   background: linear-gradient(rgba(0,0,0,0.4), rgba(0,0,0,0.6)),
               url('images/backgrounds/dayz_winter_scene.jpg') no-repeat center center fixed;
   background-size: cover;
-  font-family: sans-serif;
   color: #f0f0f0;
   font-family: Arial, sans-serif;
   overflow-y: scroll;
