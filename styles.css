@@ -48,6 +48,37 @@ body {
   margin-top: auto;
 }
 
+.deck-summary {
+  width: 100%;
+  text-align: center;
+  font-size: 16px;
+  font-weight: bold;
+}
+
+/* 🟨 Glow effect when deck is full */
+.deck-summary.full-deck {
+  color: gold;
+  text-shadow: 0 0 10px gold;
+  transition: all 0.3s ease-in-out;
+}
+
+/* 🆕 Animate card counter pulse */
+@keyframes pulse {
+  0% { transform: scale(1); }
+  50% { transform: scale(1.1); }
+  100% { transform: scale(1); }
+}
+
+.deck-summary.pulse {
+  animation: pulse 0.4s;
+}
+
+/* ❌ Red flash when trying to exceed max */
+.card-border-wrap.limit-reached {
+  border-color: red !important;
+  box-shadow: 0 0 8px 3px red !important;
+}
+
 .deck-container {
   display: flex;
   flex-wrap: wrap;
