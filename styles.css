@@ -67,13 +67,21 @@ button.scrap:hover, button.sell:hover {
   100% { box-shadow: 0 0 20px gold, 0 0 30px gold, 0 0 40px gold; }
 }
 
-/* Force 2 cards per row on phones */
+/* ✅ Force 4 larger cards per row on phones */
 @media (max-width: 600px) {
   .card-grid {
-    grid-template-columns: repeat(2, 1fr);
+    grid-template-columns: repeat(4, 1fr);
+    gap: 12px;
   }
   .card-container {
-    width: 100px;
+    width: 280px;
+    height: 360px;
+    padding: 10px;
+  }
+  .card-container img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
   }
 }
 
