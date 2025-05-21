@@ -85,6 +85,7 @@ body {
   justify-content: center;
   margin-top: 30px;
   margin-bottom: 40px;
+  gap: 10px;
 }
 
 /* 🔲 Outer wrapper: shows rarity border */
@@ -95,7 +96,7 @@ body {
   box-sizing: border-box;
   display: inline-block;
   transition: box-shadow 0.2s ease-in-out, border-color 0.2s ease-in-out;
-  margin: 10px;
+  margin: 5px;
 }
 
 /* 🟩 Green glow if selected */
@@ -166,22 +167,23 @@ button.animate {
   transform: scale(1.05);
 }
 
+/* ✅ FORCE 4 cards per row on mobile */
 @media (max-width: 768px) {
   body {
-    background-size: cover;
+    background-size: contain;
     background-position: top center;
-    background-attachment: scroll;
+  }
+
+  .deck-container {
+    display: grid !important;
+    grid-template-columns: repeat(4, 1fr);
+    justify-items: center;
+    gap: 10px;
+    padding: 0 10px;
   }
 
   .card {
     width: 160px;
     height: 240px;
-  }
-
-  .deck-container {
-    max-width: 100%;
-    display: grid;
-    grid-template-columns: repeat(4, 1fr);
-    justify-items: center;
   }
 }
