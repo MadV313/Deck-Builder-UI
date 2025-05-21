@@ -25,12 +25,11 @@ const dataSource = useMockMode
 
 dataSource.then(cards => {
   deckContainer.innerHTML = '';
-
   const grouped = {};
 
   cards.forEach(card => {
     const rawId = String(card.card_id);
-    const baseId = rawId.replace('DUP', '');
+    const baseId = rawId.replace(/DUP\d*$/, '');
 
     if (!grouped[baseId]) {
       grouped[baseId] = {
@@ -60,20 +59,15 @@ dataSource.then(cards => {
     img.alt = cardData.name;
     img.className = 'card-img';
 
-    if (cardData.quantity > 1) {
-      const badge = document.createElement('div');
-      badge.className = 'quantity-badge';
-      badge.innerText = `x${cardData.quantity}`;
-      card.appendChild(badge);
-    }
+    const badge = document.createElement('div');
+    badge.className = 'quantity-badge';
+    badge.innerText = `x${cardData.quantity}`;
+    card.appendChild(badge);
 
     card.appendChild(img);
     borderWrap.appendChild(card);
 
-    borderWrap.addEventListener('click', () =>
-      toggleCard(borderWrap, id, cardData.type, cardData.quantity)
-    );
-
+    borderWrap.addEventListener('click', () => toggleCard(borderWrap, id, cardData.type, cardData.quantity));
     deckContainer.appendChild(borderWrap);
     cardDataMap[id] = cardData;
   });
@@ -81,7 +75,6 @@ dataSource.then(cards => {
 
 function toggleCard(borderWrap, id, type, ownedQuantity) {
   id = String(id);
-
   borderWrap.classList.remove('limit-reached');
   const selected = currentDeck[id] || 0;
 
@@ -95,7 +88,6 @@ function toggleCard(borderWrap, id, type, ownedQuantity) {
   }
 
   const newTotal = Object.values(currentDeck).reduce((sum, qty) => sum + qty, 0) - selected + count;
-
   if (newTotal > 40) {
     borderWrap.classList.add('limit-reached');
     if (navigator.vibrate) navigator.vibrate([150]);
@@ -162,6 +154,11 @@ function confirmWipe() {
     document.querySelectorAll('.card-border-wrap').forEach(card => {
       card.classList.remove('selected-card', 'limit-reached');
     });
+    updateDeckSummary();
+    validateDeck();
+  }
+}
+
     updateDeckSummary();
     validateDeck();
   }
