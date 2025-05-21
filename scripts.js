@@ -28,6 +28,8 @@ const dataSource = useMockMode
 dataSource.then(cards => {
   cards.sort((a, b) => parseInt(a.card_id) - parseInt(b.card_id));
   cards.forEach(cardData => {
+    const id = String(cardData.card_id); // Ensure id is a string
+
     const borderWrap = document.createElement('div');
     borderWrap.className = 'card-border-wrap';
 
@@ -41,20 +43,24 @@ dataSource.then(cards => {
 
     card.appendChild(img);
     borderWrap.appendChild(card);
-    borderWrap.onclick = () => toggleCard(borderWrap, cardData.card_id, cardData.type);
-    deckContainer.appendChild(borderWrap);
 
-    cardDataMap[cardData.card_id] = cardData;
+    // ✅ More reliable across devices than onclick
+    borderWrap.addEventListener('click', () => toggleCard(borderWrap, id, cardData.type));
+
+    deckContainer.appendChild(borderWrap);
+    cardDataMap[id] = cardData;
   });
 });
 
 function toggleCard(borderWrap, id, type) {
+  id = String(id); // Ensure consistent type
   if (currentDeck.includes(id)) {
     currentDeck = currentDeck.filter(c => c !== id);
-    typeCount[type]--;
+    if (typeCount[type] > 0) typeCount[type]--;
     borderWrap.classList.remove('selected-card');
   } else {
     currentDeck.push(id);
+    if (!typeCount[type]) typeCount[type] = 0;
     typeCount[type]++;
     borderWrap.classList.add('selected-card');
   }
