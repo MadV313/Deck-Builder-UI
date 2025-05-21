@@ -14,6 +14,7 @@ const saveButton = document.getElementById('saveButton');
 const saveButtonBottom = document.getElementById('saveButtonBottom');
 const totalCardsDisplay = document.getElementById('totalCards');
 const typeBreakdownDisplay = document.getElementById('typeBreakdown');
+const deckSummary = document.querySelector('.deck-summary');
 
 let cardDataMap = {};
 
@@ -28,7 +29,7 @@ const dataSource = useMockMode
 dataSource.then(cards => {
   cards.sort((a, b) => parseInt(a.card_id) - parseInt(b.card_id));
   cards.forEach(cardData => {
-    const id = String(cardData.card_id); // Ensure id is a string
+    const id = String(cardData.card_id); // Ensure ID is string
 
     const borderWrap = document.createElement('div');
     borderWrap.className = 'card-border-wrap';
@@ -44,7 +45,7 @@ dataSource.then(cards => {
     card.appendChild(img);
     borderWrap.appendChild(card);
 
-    // ✅ More reliable across devices than onclick
+    // ✅ Use click listener
     borderWrap.addEventListener('click', () => toggleCard(borderWrap, id, cardData.type));
 
     deckContainer.appendChild(borderWrap);
@@ -53,24 +54,50 @@ dataSource.then(cards => {
 });
 
 function toggleCard(borderWrap, id, type) {
-  id = String(id); // Ensure consistent type
+  id = String(id); // normalize
+
+  // Remove limit warning if present
+  borderWrap.classList.remove('limit-reached');
+
   if (currentDeck.includes(id)) {
     currentDeck = currentDeck.filter(c => c !== id);
     if (typeCount[type] > 0) typeCount[type]--;
     borderWrap.classList.remove('selected-card');
   } else {
+    if (currentDeck.length >= 40) {
+      // ❌ Max reached
+      borderWrap.classList.add('limit-reached');
+      setTimeout(() => borderWrap.classList.remove('limit-reached'), 600);
+      alert("⚠️ You can't add more than 40 cards.");
+      return;
+    }
+
     currentDeck.push(id);
     if (!typeCount[type]) typeCount[type] = 0;
     typeCount[type]++;
     borderWrap.classList.add('selected-card');
   }
+
   updateDeckSummary();
   validateDeck();
 }
 
 function updateDeckSummary() {
+  // Animate card count on update
+  totalCardsDisplay.classList.remove('pulse');
+  void totalCardsDisplay.offsetWidth; // force reflow
+  totalCardsDisplay.classList.add('pulse');
+
   totalCardsDisplay.innerText = `Cards Selected: ${currentDeck.length} / (20–40)`;
-  typeBreakdownDisplay.innerText = `⚔️x${typeCount["Attack"]} 🛡️x${typeCount["Defense"]} 🧭x${typeCount["Tactical"]} 🎒x${typeCount["Loot"]} ☣️x${typeCount["Infected"]} 🧨x${typeCount["Trap"]} ✨x${typeCount["Legendary"]}`;
+  typeBreakdownDisplay.innerText =
+    `⚔️x${typeCount["Attack"]} 🛡️x${typeCount["Defense"]} 🧭x${typeCount["Tactical"]} 🎒x${typeCount["Loot"]} ☣️x${typeCount["Infected"]} 🧨x${typeCount["Trap"]} ✨x${typeCount["Legendary"]}`;
+
+  // Gold highlight if full
+  if (currentDeck.length === 40) {
+    deckSummary.classList.add('full-deck');
+  } else {
+    deckSummary.classList.remove('full-deck');
+  }
 }
 
 function validateDeck() {
@@ -94,7 +121,7 @@ function confirmWipe() {
     currentDeck = [];
     Object.keys(typeCount).forEach(key => typeCount[key] = 0);
     document.querySelectorAll('.card-border-wrap').forEach(card => {
-      card.classList.remove('selected-card');
+      card.classList.remove('selected-card', 'limit-reached');
     });
     updateDeckSummary();
     validateDeck();
