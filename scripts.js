@@ -31,6 +31,7 @@ dataSource.then(cards => {
     const rawId = String(card.card_id);
     const baseId = rawId.replace(/DUP\d*$/, '');
 
+    // Always prefer the base card data (non-DUP) for image/type/name
     if (!grouped[baseId]) {
       grouped[baseId] = {
         ...card,
@@ -154,11 +155,6 @@ function confirmWipe() {
     document.querySelectorAll('.card-border-wrap').forEach(card => {
       card.classList.remove('selected-card', 'limit-reached');
     });
-    updateDeckSummary();
-    validateDeck();
-  }
-}
-
     updateDeckSummary();
     validateDeck();
   }
