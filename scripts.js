@@ -75,12 +75,17 @@ dataSource.then(cards => {
   });
 });
 
-function toggleCard(borderWrap, id, type, ownedQuantity) {
-  id = id.replace(/DUP\d*$/, '').replace(/DUP$/, '');
+function toggleCard(borderWrap, rawId, type, ownedQuantity) {
+  const id = rawId.replace(/DUP\d*$/, '').replace(/DUP$/, '');
   borderWrap.classList.remove('limit-reached');
-  const selected = currentDeck[id] || 0;
 
-  const input = prompt(`You own ${ownedQuantity} of this card.\nHow many would you like to ${selected > 0 ? 'remove' : 'add'}?`, selected > 0 ? selected : 1);
+  const previousCount = currentDeck[id] || 0;
+
+  const input = prompt(
+    `You own ${ownedQuantity} of this card.\nHow many would you like to ${previousCount > 0 ? 'remove' : 'add'}?`,
+    previousCount > 0 ? previousCount : 1
+  );
+
   if (input === null) return;
 
   const count = parseInt(input);
@@ -89,7 +94,9 @@ function toggleCard(borderWrap, id, type, ownedQuantity) {
     return;
   }
 
-  const newTotal = Object.values(currentDeck).reduce((sum, qty) => sum + qty, 0) - selected + count;
+  const totalSelected = Object.values(currentDeck).reduce((sum, qty) => sum + qty, 0);
+  const newTotal = totalSelected - previousCount + count;
+
   if (newTotal > 40) {
     borderWrap.classList.add('limit-reached');
     if (navigator.vibrate) navigator.vibrate([150]);
@@ -98,8 +105,9 @@ function toggleCard(borderWrap, id, type, ownedQuantity) {
     return;
   }
 
+  // Update type count
   if (!typeCount[type]) typeCount[type] = 0;
-  typeCount[type] = typeCount[type] - selected + count;
+  typeCount[type] = typeCount[type] - previousCount + count;
 
   if (count === 0) {
     delete currentDeck[id];
