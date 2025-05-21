@@ -24,18 +24,23 @@ const dataSource = useMockMode
   : fetch('deckData.json').then(res => res.json());
 
 dataSource.then(cards => {
-  // Group cards by ID and count quantities
   const grouped = {};
+
   cards.forEach(card => {
-    const id = String(card.card_id);
-    if (!grouped[id]) {
-      grouped[id] = { ...card, quantity: 1 };
+    const rawId = String(card.card_id);
+    const baseId = rawId.replace(/DUP\d*$/, '');
+
+    if (!grouped[baseId]) {
+      grouped[baseId] = {
+        ...card,
+        card_id: baseId,
+        quantity: 1
+      };
     } else {
-      grouped[id].quantity += 1;
+      grouped[baseId].quantity += 1;
     }
   });
 
-  // Sort and render
   const sortedCards = Object.values(grouped).sort((a, b) => parseInt(a.card_id) - parseInt(b.card_id));
   sortedCards.forEach(cardData => {
     const id = String(cardData.card_id);
@@ -56,12 +61,15 @@ dataSource.then(cards => {
     const badge = document.createElement('div');
     badge.className = 'quantity-badge';
     badge.innerText = `x${cardData.quantity}`;
+    card.appendChild(badge);
 
     card.appendChild(img);
-    card.appendChild(badge);
     borderWrap.appendChild(card);
 
-    borderWrap.addEventListener('click', () => toggleCard(borderWrap, id, cardData.type, cardData.quantity));
+    borderWrap.addEventListener('click', () =>
+      toggleCard(borderWrap, id, cardData.type, cardData.quantity)
+    );
+
     deckContainer.appendChild(borderWrap);
     cardDataMap[id] = cardData;
   });
@@ -69,7 +77,6 @@ dataSource.then(cards => {
 
 function toggleCard(borderWrap, id, type, ownedQuantity) {
   id = String(id);
-
   borderWrap.classList.remove('limit-reached');
   const selected = currentDeck[id] || 0;
 
@@ -83,7 +90,6 @@ function toggleCard(borderWrap, id, type, ownedQuantity) {
   }
 
   const newTotal = Object.values(currentDeck).reduce((sum, qty) => sum + qty, 0) - selected + count;
-
   if (newTotal > 40) {
     borderWrap.classList.add('limit-reached');
     if (navigator.vibrate) navigator.vibrate([150]);
@@ -92,7 +98,6 @@ function toggleCard(borderWrap, id, type, ownedQuantity) {
     return;
   }
 
-  // Update type count
   if (!typeCount[type]) typeCount[type] = 0;
   typeCount[type] = typeCount[type] - selected + count;
 
