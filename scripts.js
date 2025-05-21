@@ -77,7 +77,7 @@ dataSource.then(cards => {
 });
 
 function toggleCard(borderWrap, rawId, type, ownedQuantity) {
-  const id = rawId.replace(/DUP\d*$/, '').replace(/DUP$/, '');
+  const id = rawId.replace(/-DUP\d*$/, '').replace(/-DUP$/, '');
   borderWrap.classList.remove('limit-reached');
 
   const selected = currentDeck[id] || 0;
@@ -94,8 +94,8 @@ function toggleCard(borderWrap, rawId, type, ownedQuantity) {
     return;
   }
 
-  const newTotal =
-    Object.entries(currentDeck).reduce((sum, [_, qty]) => sum + qty, 0) - selected + count;
+  const totalBefore = Object.values(currentDeck).reduce((sum, qty) => sum + qty, 0);
+  const newTotal = totalBefore - selected + count;
 
   if (newTotal > 40) {
     borderWrap.classList.add('limit-reached');
@@ -114,12 +114,6 @@ function toggleCard(borderWrap, rawId, type, ownedQuantity) {
   } else {
     currentDeck[id] = count;
     borderWrap.classList.add('selected-card');
-  }
-
-  // Update badge display live (optional UX enhancement)
-  const badge = document.getElementById(`badge-${id}`);
-  if (badge) {
-    badge.innerText = `x${ownedQuantity}`;
   }
 
   updateDeckSummary();
