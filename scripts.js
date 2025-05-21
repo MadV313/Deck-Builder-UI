@@ -28,7 +28,7 @@ dataSource.then(cards => {
 
   cards.forEach(card => {
     const rawId = String(card.card_id);
-    const baseId = rawId.replace(/DUP\d*$/, '').replace(/DUP$/, '');
+    const baseId = rawId.replace(/-DUP\d*$/, '').replace(/-DUP$/, '');
 
     if (!grouped[baseId]) {
       grouped[baseId] = {
