@@ -178,7 +178,7 @@ button.animate {
   }
 
   .card-border-wrap {
-    width: 290px;
+    width: 280px;
     height: 375px; /* Extra space to prevent clipping */
     padding: 5px;
   }
