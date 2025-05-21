@@ -24,21 +24,25 @@ const dataSource = useMockMode
   : fetch('deckData.json').then(res => res.json());
 
 dataSource.then(cards => {
-  // Clear container in case of hot reload
   deckContainer.innerHTML = '';
 
-  // Group cards by ID and count quantities
   const grouped = {};
+
   cards.forEach(card => {
-    const id = String(card.card_id);
-    if (!grouped[id]) {
-      grouped[id] = { ...card, quantity: 1 };
+    const rawId = String(card.card_id);
+    const baseId = rawId.replace('DUP', '');
+
+    if (!grouped[baseId]) {
+      grouped[baseId] = {
+        ...card,
+        card_id: baseId,
+        quantity: 1
+      };
     } else {
-      grouped[id].quantity += 1;
+      grouped[baseId].quantity += 1;
     }
   });
 
-  // Sort and render unique cards only
   const sortedCards = Object.values(grouped).sort((a, b) => parseInt(a.card_id) - parseInt(b.card_id));
   sortedCards.forEach(cardData => {
     const id = String(cardData.card_id);
@@ -66,7 +70,10 @@ dataSource.then(cards => {
     card.appendChild(img);
     borderWrap.appendChild(card);
 
-    borderWrap.addEventListener('click', () => toggleCard(borderWrap, id, cardData.type, cardData.quantity));
+    borderWrap.addEventListener('click', () =>
+      toggleCard(borderWrap, id, cardData.type, cardData.quantity)
+    );
+
     deckContainer.appendChild(borderWrap);
     cardDataMap[id] = cardData;
   });
@@ -97,7 +104,6 @@ function toggleCard(borderWrap, id, type, ownedQuantity) {
     return;
   }
 
-  // Update type count
   if (!typeCount[type]) typeCount[type] = 0;
   typeCount[type] = typeCount[type] - selected + count;
 
