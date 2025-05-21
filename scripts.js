@@ -76,7 +76,7 @@ dataSource.then(cards => {
 });
 
 function toggleCard(borderWrap, id, type, ownedQuantity) {
-  id = String(id);
+  id = id.replace(/DUP\d*$/, '').replace(/DUP$/, '');
   borderWrap.classList.remove('limit-reached');
   const selected = currentDeck[id] || 0;
 
