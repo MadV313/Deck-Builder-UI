@@ -7,6 +7,9 @@ body {
   overflow-y: scroll;
   margin: 0;
   padding: 0;
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
 }
 
 .snow {
@@ -23,10 +26,6 @@ body {
 }
 
 .header {
-  position: fixed;
-  top: 0;
-  width: 100%;
-  z-index: 1000;
   background-color: rgba(0, 0, 0, 0);
   display: flex;
   flex-direction: column;
@@ -34,13 +33,10 @@ body {
   justify-content: center;
   gap: 10px;
   padding: 15px;
+  width: 100%;
 }
 
 .footer {
-  position: fixed;
-  bottom: 0;
-  width: 100%;
-  z-index: 1000;
   background-color: rgba(0, 0, 0, 0);
   display: flex;
   flex-direction: column;
@@ -48,19 +44,22 @@ body {
   justify-content: center;
   gap: 10px;
   padding: 15px;
+  width: 100%;
+  margin-top: auto;
 }
 
 .deck-container {
   display: flex;
   flex-wrap: wrap;
   justify-content: center;
-  margin-top: 20px;
+  margin-top: 30px;
+  margin-bottom: 40px;
 }
 
 /* 🔲 Outer wrapper: shows rarity border */
 .card-border-wrap {
   padding: 3px;
-  border: 3px solid gray; /* Default fallback color */
+  border: 3px solid gray;
   border-radius: 10px;
   box-sizing: border-box;
   display: inline-block;
@@ -126,3 +125,4 @@ button.animate {
     height: 240px;
   }
 }
+
