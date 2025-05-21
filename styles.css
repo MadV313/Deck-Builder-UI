@@ -80,12 +80,11 @@ body {
 }
 
 .deck-container {
-  display: flex;
-  flex-wrap: wrap;
-  justify-content: center;
-  margin-top: 30px;
-  margin-bottom: 40px;
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
   gap: 10px;
+  justify-items: center;
+  padding: 0 10px;
 }
 
 /* 🔲 Outer wrapper: shows rarity border */
@@ -107,8 +106,8 @@ body {
 
 /* Inner card layout */
 .card {
-  width: 140px;
-  height: 210px;
+  width: 160px;
+  height: 240px;
   border: 2px solid #1b1b1b;
   border-radius: 6px;
   background-color: #1b1b1b;
