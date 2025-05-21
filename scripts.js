@@ -24,6 +24,9 @@ const dataSource = useMockMode
   : fetch('deckData.json').then(res => res.json());
 
 dataSource.then(cards => {
+  // Clear container in case of hot reload
+  deckContainer.innerHTML = '';
+
   // Group cards by ID and count quantities
   const grouped = {};
   cards.forEach(card => {
@@ -35,7 +38,7 @@ dataSource.then(cards => {
     }
   });
 
-  // Sort and render
+  // Sort and render unique cards only
   const sortedCards = Object.values(grouped).sort((a, b) => parseInt(a.card_id) - parseInt(b.card_id));
   sortedCards.forEach(cardData => {
     const id = String(cardData.card_id);
@@ -53,12 +56,14 @@ dataSource.then(cards => {
     img.alt = cardData.name;
     img.className = 'card-img';
 
-    const badge = document.createElement('div');
-    badge.className = 'quantity-badge';
-    badge.innerText = `x${cardData.quantity}`;
+    if (cardData.quantity > 1) {
+      const badge = document.createElement('div');
+      badge.className = 'quantity-badge';
+      badge.innerText = `x${cardData.quantity}`;
+      card.appendChild(badge);
+    }
 
     card.appendChild(img);
-    card.appendChild(badge);
     borderWrap.appendChild(card);
 
     borderWrap.addEventListener('click', () => toggleCard(borderWrap, id, cardData.type, cardData.quantity));
