@@ -1,4 +1,4 @@
-let currentDeck = [];
+let currentDeck = {};
 let typeCount = {
   "Attack": 0,
   "Defense": 0,
@@ -17,22 +17,33 @@ const typeBreakdownDisplay = document.getElementById('typeBreakdown');
 const deckSummary = document.querySelector('.deck-summary');
 
 let cardDataMap = {};
-
-// 🔀 Toggle this to true for mock testing, false for real data
 const useMockMode = true;
 
-// 🔄 Choose data source
 const dataSource = useMockMode
   ? fetch('mock_deckData.json').then(res => res.json())
   : fetch('deckData.json').then(res => res.json());
 
 dataSource.then(cards => {
-  cards.sort((a, b) => parseInt(a.card_id) - parseInt(b.card_id));
-  cards.forEach(cardData => {
-    const id = String(cardData.card_id); // Ensure ID is string
+  // Group cards by ID and count quantities
+  const grouped = {};
+  cards.forEach(card => {
+    const id = String(card.card_id);
+    if (!grouped[id]) {
+      grouped[id] = { ...card, quantity: 1 };
+    } else {
+      grouped[id].quantity += 1;
+    }
+  });
+
+  // Sort and render
+  const sortedCards = Object.values(grouped).sort((a, b) => parseInt(a.card_id) - parseInt(b.card_id));
+  sortedCards.forEach(cardData => {
+    const id = String(cardData.card_id);
 
     const borderWrap = document.createElement('div');
     borderWrap.className = 'card-border-wrap';
+    borderWrap.setAttribute('data-card-id', id);
+    borderWrap.setAttribute('data-quantity', cardData.quantity);
 
     const card = document.createElement('div');
     card.className = 'card';
@@ -42,42 +53,54 @@ dataSource.then(cards => {
     img.alt = cardData.name;
     img.className = 'card-img';
 
+    const badge = document.createElement('div');
+    badge.className = 'quantity-badge';
+    badge.innerText = `x${cardData.quantity}`;
+
     card.appendChild(img);
+    card.appendChild(badge);
     borderWrap.appendChild(card);
 
-    // ✅ Use click listener
-    borderWrap.addEventListener('click', () => toggleCard(borderWrap, id, cardData.type));
-
+    borderWrap.addEventListener('click', () => toggleCard(borderWrap, id, cardData.type, cardData.quantity));
     deckContainer.appendChild(borderWrap);
     cardDataMap[id] = cardData;
   });
 });
 
-function toggleCard(borderWrap, id, type) {
-  id = String(id); // normalize
+function toggleCard(borderWrap, id, type, ownedQuantity) {
+  id = String(id);
 
-  // Remove limit warning if present
   borderWrap.classList.remove('limit-reached');
+  const selected = currentDeck[id] || 0;
 
-  if (currentDeck.includes(id)) {
-    currentDeck = currentDeck.filter(c => c !== id);
-    if (typeCount[type] > 0) typeCount[type]--;
+  const input = prompt(`You own ${ownedQuantity} of this card.\nHow many would you like to ${selected > 0 ? 'remove' : 'add'}?`, selected > 0 ? selected : 1);
+  if (input === null) return;
+
+  const count = parseInt(input);
+  if (isNaN(count) || count < 0 || count > ownedQuantity) {
+    alert(`Please enter a valid number between 0 and ${ownedQuantity}`);
+    return;
+  }
+
+  const newTotal = Object.values(currentDeck).reduce((sum, qty) => sum + qty, 0) - selected + count;
+
+  if (newTotal > 40) {
+    borderWrap.classList.add('limit-reached');
+    if (navigator.vibrate) navigator.vibrate([150]);
+    setTimeout(() => borderWrap.classList.remove('limit-reached'), 600);
+    alert("⚠️ You can't add more than 40 cards.");
+    return;
+  }
+
+  // Update type count
+  if (!typeCount[type]) typeCount[type] = 0;
+  typeCount[type] = typeCount[type] - selected + count;
+
+  if (count === 0) {
+    delete currentDeck[id];
     borderWrap.classList.remove('selected-card');
   } else {
-    if (currentDeck.length >= 40) {
-      // ❌ Max reached
-      borderWrap.classList.add('limit-reached');
-      if (navigator.vibrate) {
-        navigator.vibrate([150]); // 🔔 Mobile vibration
-      }
-      setTimeout(() => borderWrap.classList.remove('limit-reached'), 600);
-      alert("⚠️ You can't add more than 40 cards.");
-      return;
-    }
-
-    currentDeck.push(id);
-    if (!typeCount[type]) typeCount[type] = 0;
-    typeCount[type]++;
+    currentDeck[id] = count;
     borderWrap.classList.add('selected-card');
   }
 
@@ -86,17 +109,17 @@ function toggleCard(borderWrap, id, type) {
 }
 
 function updateDeckSummary() {
-  // Animate card count on update
+  const total = Object.values(currentDeck).reduce((sum, qty) => sum + qty, 0);
+
   totalCardsDisplay.classList.remove('pulse');
-  void totalCardsDisplay.offsetWidth; // force reflow
+  void totalCardsDisplay.offsetWidth;
   totalCardsDisplay.classList.add('pulse');
 
-  totalCardsDisplay.innerText = `Cards Selected: ${currentDeck.length} / (20–40)`;
+  totalCardsDisplay.innerText = `Cards Selected: ${total} / (20–40)`;
   typeBreakdownDisplay.innerText =
     `⚔️x${typeCount["Attack"]} 🛡️x${typeCount["Defense"]} 🧭x${typeCount["Tactical"]} 🎒x${typeCount["Loot"]} ☣️x${typeCount["Infected"]} 🧨x${typeCount["Trap"]} ✨x${typeCount["Legendary"]}`;
 
-  // Gold highlight if full
-  if (currentDeck.length === 40) {
+  if (total === 40) {
     deckSummary.classList.add('full-deck');
   } else {
     deckSummary.classList.remove('full-deck');
@@ -104,7 +127,8 @@ function updateDeckSummary() {
 }
 
 function validateDeck() {
-  const valid = currentDeck.length >= 20 && currentDeck.length <= 40;
+  const total = Object.values(currentDeck).reduce((sum, qty) => sum + qty, 0);
+  const valid = total >= 20 && total <= 40;
   [saveButton, saveButtonBottom].forEach(btn => {
     btn.classList.toggle('disabled', !valid);
     btn.classList.toggle('animate', valid);
@@ -112,7 +136,8 @@ function validateDeck() {
 }
 
 function saveDeck() {
-  if (currentDeck.length >= 20 && currentDeck.length <= 40) {
+  const total = Object.values(currentDeck).reduce((sum, qty) => sum + qty, 0);
+  if (total >= 20 && total <= 40) {
     alert('Deck saved successfully!');
   } else {
     alert('Deck must be between 20 and 40 cards.');
@@ -121,7 +146,7 @@ function saveDeck() {
 
 function confirmWipe() {
   if (confirm('Are you sure you want to wipe your deck?')) {
-    currentDeck = [];
+    currentDeck = {};
     Object.keys(typeCount).forEach(key => typeCount[key] = 0);
     document.querySelectorAll('.card-border-wrap').forEach(card => {
       card.classList.remove('selected-card', 'limit-reached');
