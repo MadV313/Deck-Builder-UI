@@ -61,9 +61,10 @@ dataSource.then(cards => {
     const badge = document.createElement('div');
     badge.className = 'quantity-badge';
     badge.innerText = `x${cardData.quantity}`;
-    card.appendChild(badge);
+    badge.id = `badge-${id}`;
 
     card.appendChild(img);
+    card.appendChild(badge);
     borderWrap.appendChild(card);
 
     borderWrap.addEventListener('click', () =>
@@ -79,13 +80,12 @@ function toggleCard(borderWrap, rawId, type, ownedQuantity) {
   const id = rawId.replace(/DUP\d*$/, '').replace(/DUP$/, '');
   borderWrap.classList.remove('limit-reached');
 
-  const previousCount = currentDeck[id] || 0;
+  const selected = currentDeck[id] || 0;
 
   const input = prompt(
-    `You own ${ownedQuantity} of this card.\nHow many would you like to ${previousCount > 0 ? 'remove' : 'add'}?`,
-    previousCount > 0 ? previousCount : 1
+    `You own ${ownedQuantity} of this card.\nHow many would you like to ${selected > 0 ? 'remove' : 'add'}?`,
+    selected > 0 ? selected : 1
   );
-
   if (input === null) return;
 
   const count = parseInt(input);
@@ -94,8 +94,8 @@ function toggleCard(borderWrap, rawId, type, ownedQuantity) {
     return;
   }
 
-  const totalSelected = Object.values(currentDeck).reduce((sum, qty) => sum + qty, 0);
-  const newTotal = totalSelected - previousCount + count;
+  const newTotal =
+    Object.entries(currentDeck).reduce((sum, [_, qty]) => sum + qty, 0) - selected + count;
 
   if (newTotal > 40) {
     borderWrap.classList.add('limit-reached');
@@ -105,9 +105,8 @@ function toggleCard(borderWrap, rawId, type, ownedQuantity) {
     return;
   }
 
-  // Update type count
   if (!typeCount[type]) typeCount[type] = 0;
-  typeCount[type] = typeCount[type] - previousCount + count;
+  typeCount[type] = typeCount[type] - selected + count;
 
   if (count === 0) {
     delete currentDeck[id];
@@ -115,6 +114,12 @@ function toggleCard(borderWrap, rawId, type, ownedQuantity) {
   } else {
     currentDeck[id] = count;
     borderWrap.classList.add('selected-card');
+  }
+
+  // Update badge display live (optional UX enhancement)
+  const badge = document.getElementById(`badge-${id}`);
+  if (badge) {
+    badge.innerText = `x${ownedQuantity}`;
   }
 
   updateDeckSummary();
