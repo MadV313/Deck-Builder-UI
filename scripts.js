@@ -67,6 +67,9 @@ function toggleCard(borderWrap, id, type) {
     if (currentDeck.length >= 40) {
       // ❌ Max reached
       borderWrap.classList.add('limit-reached');
+      if (navigator.vibrate) {
+        navigator.vibrate([150]); // 🔔 Mobile vibration
+      }
       setTimeout(() => borderWrap.classList.remove('limit-reached'), 600);
       alert("⚠️ You can't add more than 40 cards.");
       return;
