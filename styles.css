@@ -173,14 +173,14 @@ button.animate {
     grid-template-columns: repeat(3, 1fr);  /* 3 cards per row */
     justify-items: center;
     gap: 18px;
-    padding: 10px;
+    padding: 5px;
     box-sizing: border-box;
   }
 
   .card-border-wrap {
     width: 280px;
     height: 375px; /* Extra space to prevent clipping */
-    padding: 0px;
+    padding: 5px;
   }
 
   .card {
