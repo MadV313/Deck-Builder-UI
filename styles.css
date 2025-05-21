@@ -144,19 +144,6 @@ button.animate {
   to { box-shadow: 0 0 20px teal; }
 }
 
-@media (max-width: 768px) {
-  body {
-    background-size: cover;
-    background-position: top center;
-    background-attachment: scroll;
-  }
-
-  .card {
-    width: 160px;
-    height: 240px;
-  }
-}
-
 /* 🔗 Back to Hub button */
 .back-to-hub {
   position: fixed;
@@ -177,6 +164,26 @@ button.animate {
 .back-to-hub:hover {
   background-color: rgba(0, 128, 128, 0.9);
   transform: scale(1.05);
+}
+
+@media (max-width: 768px) {
+  body {
+    background-size: cover;
+    background-position: top center;
+    background-attachment: scroll;
+  }
+
+  .card {
+    width: 160px;
+    height: 240px;
+  }
+
+  .deck-container {
+    max-width: 100%;
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    justify-items: center;
+  }
 }
 
 
