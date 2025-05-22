@@ -84,13 +84,13 @@ function toggleCard(borderWrap, rawId, type, ownedQuantity) {
   const totalCardsNow = Object.values(currentDeck).reduce((sum, qty) => sum + qty, 0);
 
   // 🚫 Prevent adding new cards if deck is full
-  if (totalCardsNow >= 40 && currentSelected === 0) {
-    borderWrap.classList.add('limit-reached', 'shake');
-    if (navigator.vibrate) navigator.vibrate([150]);
-    setTimeout(() => borderWrap.classList.remove('limit-reached', 'shake'), 600);
-    alert("⚠️ Your deck is already full. (40 cards max). Remove a card first.");
-    return;
-  }
+  if (Object.values(currentDeck).reduce((sum, qty) => sum + qty, 0) >= 40 && desiredCount > 0) {
+  borderWrap.classList.add('limit-reached', 'shake');
+  if (navigator.vibrate) navigator.vibrate([200]);
+  setTimeout(() => borderWrap.classList.remove('limit-reached', 'shake'), 600);
+  alert("⚠️ Your deck already has 40 cards. Remove one before adding more.");
+  return;
+}
 
   const maxAllowed = Math.min(ownedQuantity, 5);
   let desiredCount;
