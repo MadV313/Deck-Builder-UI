@@ -230,7 +230,9 @@ button.animate {
 
 @media (max-width: 768px) {
   body {
-    background-size: 200%; /* Zoomed out */
-    background-position: center top; /* Optional: shift upward if needed */
+    background-size: contain; /* Show full image without stretching */
+    background-repeat: no-repeat;
+    background-position: center top;
   }
 }
+
