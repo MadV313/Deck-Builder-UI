@@ -195,7 +195,7 @@ function saveDeck() {
       const shuffleCard = document.createElement('img');
       shuffleCard.src = 'images/cards/000_CardBack_Unique.png';
       shuffleCard.className = 'shuffle-card';
-      shuffleCard.style.animationDelay = `${i * 0.25 + shuffleDelay / 1000}s`;
+      shuffleCard.style.animationDelay = `${i * 0.45 + shuffleDelay / 1000}s`;
       pile.appendChild(shuffleCard);
     }
 
