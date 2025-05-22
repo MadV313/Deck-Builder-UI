@@ -87,7 +87,7 @@ function toggleCard(borderWrap, rawId, type, ownedQuantity) {
   // Enforce deck max BEFORE prompting
   if (totalCardsNow >= 40 && currentSelected === 0) {
     borderWrap.classList.add('limit-reached', 'shake');
-    if (navigator.vibrate) navigator.vibrate([200]); // ✅ Mobile-only vibration
+    if (navigator.vibrate) navigator.vibrate([200]);
     setTimeout(() => borderWrap.classList.remove('limit-reached', 'shake'), 600);
     alert("⚠️ Your deck already has 40 cards. Remove one before adding more.");
     return;
@@ -96,7 +96,6 @@ function toggleCard(borderWrap, rawId, type, ownedQuantity) {
   let desiredCount;
 
   if (ownedQuantity === 1) {
-    // Simple toggle for x1 cards
     desiredCount = currentSelected > 0 ? 0 : 1;
   } else {
     const input = prompt(
@@ -123,7 +122,6 @@ function toggleCard(borderWrap, rawId, type, ownedQuantity) {
     return;
   }
 
-  // Update type count
   if (!typeCount[type]) typeCount[type] = 0;
   typeCount[type] = typeCount[type] - currentSelected + desiredCount;
 
@@ -141,7 +139,6 @@ function toggleCard(borderWrap, rawId, type, ownedQuantity) {
 
 function updateDeckSummary() {
   const total = Object.values(currentDeck).reduce((sum, qty) => sum + qty, 0);
-
   totalCardsDisplay.classList.remove('pulse');
   void totalCardsDisplay.offsetWidth;
   totalCardsDisplay.classList.add('pulse');
@@ -150,11 +147,7 @@ function updateDeckSummary() {
   typeBreakdownDisplay.innerText =
     `⚔️x${typeCount["Attack"]} 🛡️x${typeCount["Defense"]} 🧭x${typeCount["Tactical"]} 🎒x${typeCount["Loot"]} ☣️x${typeCount["Infected"]} 🧨x${typeCount["Trap"]} ✨x${typeCount["Legendary"]}`;
 
-  if (total === 40) {
-    deckSummary.classList.add('full-deck');
-  } else {
-    deckSummary.classList.remove('full-deck');
-  }
+  deckSummary.classList.toggle('full-deck', total === 40);
 }
 
 function validateDeck() {
@@ -168,11 +161,49 @@ function validateDeck() {
 
 function saveDeck() {
   const total = Object.values(currentDeck).reduce((sum, qty) => sum + qty, 0);
-  if (total >= 20 && total <= 40) {
-    alert('Deck saved successfully!');
-  } else {
+  if (total < 20 || total > 40) {
     alert('Deck must be between 20 and 40 cards.');
+    return;
   }
+
+  // Animate current cards sliding out
+  const cards = document.querySelectorAll('.card-border-wrap');
+  cards.forEach(card => {
+    card.classList.add('slide-out-left');
+  });
+
+  // Clear after animation
+  setTimeout(() => {
+    deckContainer.innerHTML = '';
+
+    // Add deck pile shuffle cards
+    const pile = document.createElement('div');
+    pile.className = 'deck-pile';
+    deckContainer.appendChild(pile);
+
+    for (let i = 0; i < 12; i++) {
+      const shuffleCard = document.createElement('img');
+      shuffleCard.src = 'images/cards/000_WinterLandDeck_Back.png';
+      shuffleCard.className = 'shuffle-card';
+      shuffleCard.style.animationDelay = `${i * 0.15}s`;
+      pile.appendChild(shuffleCard);
+    }
+
+    // Toast
+    const toast = document.createElement('div');
+    toast.className = 'deck-toast';
+    toast.innerText = '✅ Deck Saved!';
+    document.body.appendChild(toast);
+
+    setTimeout(() => {
+      toast.classList.add('show');
+    }, 1800);
+
+    setTimeout(() => {
+      toast.classList.remove('show');
+      toast.remove();
+    }, 4000);
+  }, 600);
 }
 
 function confirmWipe() {
