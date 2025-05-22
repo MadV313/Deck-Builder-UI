@@ -230,8 +230,8 @@ button.animate {
 
 @media (max-width: 768px) {
   body {
-    background-size: contain !important;
+    background-size: cover !important;
+    background-position: 20% top !important;  /* Shift left to show more of the right side */
     background-repeat: no-repeat !important;
-    background-position: center top !important;
   }
 }
