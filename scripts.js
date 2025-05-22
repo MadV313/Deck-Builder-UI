@@ -78,11 +78,21 @@ dataSource.then(cards => {
 
 function toggleCard(borderWrap, rawId, type, ownedQuantity) {
   const id = rawId.replace(/-DUP\d*$/, '').replace(/-DUP$/, '');
-  borderWrap.classList.remove('limit-reached');
+  borderWrap.classList.remove('limit-reached', 'shake');
 
   const currentSelected = currentDeck[id] || 0;
-  const maxAllowed = Math.min(ownedQuantity, 5);
+  const totalCardsNow = Object.values(currentDeck).reduce((sum, qty) => sum + qty, 0);
 
+  // 🚫 Prevent adding new cards if deck is full
+  if (totalCardsNow >= 40 && currentSelected === 0) {
+    borderWrap.classList.add('limit-reached', 'shake');
+    if (navigator.vibrate) navigator.vibrate([150]);
+    setTimeout(() => borderWrap.classList.remove('limit-reached', 'shake'), 600);
+    alert("⚠️ Your deck is already full. (40 cards max). Remove a card first.");
+    return;
+  }
+
+  const maxAllowed = Math.min(ownedQuantity, 5);
   let desiredCount;
 
   if (ownedQuantity === 1) {
@@ -103,13 +113,12 @@ function toggleCard(borderWrap, rawId, type, ownedQuantity) {
     desiredCount = parsed;
   }
 
-  const totalCardsNow = Object.values(currentDeck).reduce((sum, qty) => sum + qty, 0);
   const newTotal = totalCardsNow - currentSelected + desiredCount;
 
   if (newTotal > 40) {
-    borderWrap.classList.add('limit-reached');
+    borderWrap.classList.add('limit-reached', 'shake');
     if (navigator.vibrate) navigator.vibrate([150]);
-    setTimeout(() => borderWrap.classList.remove('limit-reached'), 600);
+    setTimeout(() => borderWrap.classList.remove('limit-reached', 'shake'), 600);
     alert("⚠️ You can't add more than 40 cards.");
     return;
   }
