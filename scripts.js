@@ -84,11 +84,20 @@ function toggleCard(borderWrap, rawId, type, ownedQuantity) {
   const maxAllowed = Math.min(ownedQuantity, 5);
   const totalCardsNow = Object.values(currentDeck).reduce((sum, qty) => sum + qty, 0);
 
-  // Enforce deck max BEFORE prompting
+  const isMobile = /Mobi|Android/i.test(navigator.userAgent);
+
+  // Max deck enforcement BEFORE prompt
   if (totalCardsNow >= 40 && currentSelected === 0) {
     borderWrap.classList.add('limit-reached', 'shake');
-    if (navigator.vibrate) navigator.vibrate([200]);
-    setTimeout(() => borderWrap.classList.remove('limit-reached', 'shake'), 600);
+    if (isMobile && navigator.vibrate) navigator.vibrate([200]);
+
+    setTimeout(() => borderWrap.classList.remove('shake'), 400);
+    if (!isMobile) {
+      setTimeout(() => borderWrap.classList.remove('limit-reached'), 800);
+    } else {
+      borderWrap.classList.remove('limit-reached');
+    }
+
     alert("⚠️ Your deck already has 40 cards. Remove one before adding more.");
     return;
   }
@@ -113,7 +122,6 @@ function toggleCard(borderWrap, rawId, type, ownedQuantity) {
   }
 
   const newTotal = totalCardsNow - currentSelected + desiredCount;
-
   if (newTotal > 40) {
     borderWrap.classList.add('limit-reached', 'shake');
     if (navigator.vibrate) navigator.vibrate([200]);
@@ -166,17 +174,14 @@ function saveDeck() {
     return;
   }
 
-  // Animate current cards sliding out
   const cards = document.querySelectorAll('.card-border-wrap');
   cards.forEach(card => {
     card.classList.add('slide-out-left');
   });
 
-  // Clear after animation
   setTimeout(() => {
     deckContainer.innerHTML = '';
 
-    // Add deck pile shuffle cards
     const pile = document.createElement('div');
     pile.className = 'deck-pile';
     deckContainer.appendChild(pile);
@@ -189,16 +194,12 @@ function saveDeck() {
       pile.appendChild(shuffleCard);
     }
 
-    // Toast
     const toast = document.createElement('div');
     toast.className = 'deck-toast';
     toast.innerText = '✅ Deck Saved!';
     document.body.appendChild(toast);
 
-    setTimeout(() => {
-      toast.classList.add('show');
-    }, 1800);
-
+    setTimeout(() => toast.classList.add('show'), 1800);
     setTimeout(() => {
       toast.classList.remove('show');
       toast.remove();
