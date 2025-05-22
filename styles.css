@@ -55,14 +55,12 @@ body {
   font-weight: bold;
 }
 
-/* 🟨 Glow effect when deck is full */
 .deck-summary.full-deck {
   color: gold;
   text-shadow: 0 0 10px gold;
   transition: all 0.3s ease-in-out;
 }
 
-/* 🆕 Animate card counter pulse */
 @keyframes pulse {
   0% { transform: scale(1); }
   50% { transform: scale(1.1); }
@@ -72,7 +70,7 @@ body {
   animation: pulse 0.4s;
 }
 
-/* ❌ Red flash + shake when exceeding max deck */
+/* ❌ Red + shake when limit reached */
 .card-border-wrap.limit-reached {
   border-color: red !important;
   box-shadow: 0 0 8px 3px red !important;
@@ -96,7 +94,7 @@ body {
   margin-bottom: 40px;
 }
 
-/* 🔲 Rarity wrapper */
+/* 🔲 Card rarity border */
 .card-border-wrap {
   padding: 3px;
   border: 3px solid gray;
@@ -107,13 +105,12 @@ body {
   margin: 10px;
 }
 
-/* 🟩 Green glow if selected */
+/* 🟩 Selected card highlight */
 .card-border-wrap.selected-card {
   box-shadow: 0 0 12px 3px limegreen;
   border-color: limegreen !important;
 }
 
-/* Card layout */
 .card {
   width: 140px;
   height: 210px;
@@ -124,7 +121,6 @@ body {
   text-align: center;
   position: relative;
 }
-
 .card img {
   width: 100%;
   height: 100%;
@@ -152,7 +148,6 @@ button.animate {
   to { box-shadow: 0 0 24px teal; }
 }
 
-/* 🔗 Back to Hub */
 .back-to-hub {
   position: fixed;
   top: 15px;
@@ -173,7 +168,7 @@ button.animate {
   transform: scale(1.05);
 }
 
-/* 📱 Mobile background + card layout */
+/* 📱 Mobile background + layout */
 @media (max-width: 768px) {
   body {
     background-size: 250% !important;
@@ -182,7 +177,6 @@ button.animate {
   }
 }
 
-/* 📛 Quantity badge */
 .quantity-badge {
   position: absolute;
   bottom: 6px;
@@ -196,7 +190,7 @@ button.animate {
   z-index: 10;
 }
 
-/* ✅ 3-wide layout for mobile */
+/* ✅ 3-wide mobile layout */
 @media (max-width: 1200px) {
   .deck-container {
     display: grid;
@@ -240,4 +234,57 @@ button.animate {
     font-size: 22px;
     padding: 18px 30px;
   }
+}
+
+/* 🎬 Deck Save Animation Styles */
+@keyframes slideOutLeft {
+  0% { transform: translateX(0); opacity: 1; }
+  100% { transform: translateX(-100vw); opacity: 0; }
+}
+.slide-out-left {
+  animation: slideOutLeft 0.6s ease forwards;
+}
+
+.deck-pile {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  height: 420px;
+  margin-top: 60px;
+  position: relative;
+}
+
+.shuffle-card {
+  width: 160px;
+  height: 220px;
+  position: absolute;
+  animation: slideInCard 0.4s ease-out forwards;
+  opacity: 0;
+}
+
+@keyframes slideInCard {
+  0% { transform: translateX(120vw) rotate(0deg); opacity: 0; }
+  100% { transform: translateX(0) rotate(-4deg); opacity: 1; }
+}
+
+/* 🪄 Toast message */
+.deck-toast {
+  position: fixed;
+  bottom: 50px;
+  left: 50%;
+  transform: translateX(-50%);
+  background-color: #1b1b1b;
+  color: gold;
+  border: 2px solid gold;
+  padding: 14px 26px;
+  font-size: 22px;
+  font-weight: bold;
+  border-radius: 12px;
+  opacity: 0;
+  transition: opacity 0.5s ease;
+  z-index: 10000;
+}
+.deck-toast.show {
+  opacity: 1;
 }
