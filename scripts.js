@@ -81,18 +81,26 @@ function toggleCard(borderWrap, rawId, type, ownedQuantity) {
   borderWrap.classList.remove('limit-reached');
 
   const currentSelected = currentDeck[id] || 0;
+  const maxAllowed = Math.min(ownedQuantity, 5);
 
-  const input = prompt(
-    `You own ${ownedQuantity} of this card.\nCurrently selected: ${currentSelected}.\nEnter new desired quantity (0 to ${ownedQuantity}):`,
-    currentSelected
-  );
+  let desiredCount;
 
-  if (input === null) return;
+  if (ownedQuantity === 1) {
+    // Simple toggle behavior
+    desiredCount = currentSelected > 0 ? 0 : 1;
+  } else {
+    const input = prompt(
+      `You own ${ownedQuantity} of this card.\nCurrently selected: ${currentSelected}.\nEnter new desired quantity (0 to ${maxAllowed}):`,
+      currentSelected
+    );
+    if (input === null) return;
 
-  const desiredCount = parseInt(input);
-  if (isNaN(desiredCount) || desiredCount < 0 || desiredCount > ownedQuantity) {
-    alert(`Please enter a valid number between 0 and ${ownedQuantity}`);
-    return;
+    const parsed = parseInt(input);
+    if (isNaN(parsed) || parsed < 0 || parsed > maxAllowed) {
+      alert(`Please enter a valid number between 0 and ${maxAllowed}`);
+      return;
+    }
+    desiredCount = parsed;
   }
 
   const totalCardsNow = Object.values(currentDeck).reduce((sum, qty) => sum + qty, 0);
