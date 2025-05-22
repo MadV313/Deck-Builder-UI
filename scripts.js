@@ -81,22 +81,22 @@ function toggleCard(borderWrap, rawId, type, ownedQuantity) {
   borderWrap.classList.remove('limit-reached', 'shake');
 
   const currentSelected = currentDeck[id] || 0;
+  const maxAllowed = Math.min(ownedQuantity, 5);
   const totalCardsNow = Object.values(currentDeck).reduce((sum, qty) => sum + qty, 0);
 
-  // 🚫 Prevent adding new cards if deck is full
-  if (Object.values(currentDeck).reduce((sum, qty) => sum + qty, 0) >= 40 && desiredCount > 0) {
-  borderWrap.classList.add('limit-reached', 'shake');
-  if (navigator.vibrate) navigator.vibrate([200]);
-  setTimeout(() => borderWrap.classList.remove('limit-reached', 'shake'), 600);
-  alert("⚠️ Your deck already has 40 cards. Remove one before adding more.");
-  return;
-}
+  // Enforce deck max BEFORE prompting
+  if (totalCardsNow >= 40 && currentSelected === 0) {
+    borderWrap.classList.add('limit-reached', 'shake');
+    if (navigator.vibrate) navigator.vibrate([200]); // ✅ Mobile-only vibration
+    setTimeout(() => borderWrap.classList.remove('limit-reached', 'shake'), 600);
+    alert("⚠️ Your deck already has 40 cards. Remove one before adding more.");
+    return;
+  }
 
-  const maxAllowed = Math.min(ownedQuantity, 5);
   let desiredCount;
 
   if (ownedQuantity === 1) {
-    // Simple toggle behavior
+    // Simple toggle for x1 cards
     desiredCount = currentSelected > 0 ? 0 : 1;
   } else {
     const input = prompt(
@@ -117,7 +117,7 @@ function toggleCard(borderWrap, rawId, type, ownedQuantity) {
 
   if (newTotal > 40) {
     borderWrap.classList.add('limit-reached', 'shake');
-    if (navigator.vibrate) navigator.vibrate([150]);
+    if (navigator.vibrate) navigator.vibrate([200]);
     setTimeout(() => borderWrap.classList.remove('limit-reached', 'shake'), 600);
     alert("⚠️ You can't add more than 40 cards.");
     return;
