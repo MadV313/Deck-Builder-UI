@@ -183,7 +183,7 @@ function saveDeck() {
 
     for (let i = 0; i < 12; i++) {
       const shuffleCard = document.createElement('img');
-      shuffleCard.src = 'images/cards/000_WinterLandDeck_Back.png';
+      shuffleCard.src = 'images/cards/000_CardBack_Unique.png';
       shuffleCard.className = 'shuffle-card';
       shuffleCard.style.animationDelay = `${i * 0.15}s`;
       pile.appendChild(shuffleCard);
