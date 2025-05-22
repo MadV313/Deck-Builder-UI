@@ -19,6 +19,7 @@ const deckSummary = document.querySelector('.deck-summary');
 let cardDataMap = {};
 const useMockMode = true;
 let savedDeck = {};
+let deckHighlightActive = false;
 
 const dataSource = useMockMode
   ? fetch('mock_deckData.json').then(res => res.json())
@@ -174,7 +175,7 @@ function saveDeck() {
     return;
   }
 
-  savedDeck = { ...currentDeck }; // 🔒 Save copy
+  savedDeck = { ...currentDeck };
 
   const cards = document.querySelectorAll('.card-border-wrap');
   cards.forEach(card => {
@@ -233,15 +234,18 @@ function confirmWipe() {
   }
 }
 
-// 📌 Highlight My Deck button logic
+// 📌 Toggle highlight on My Deck
 function highlightMyDeck() {
+  deckHighlightActive = !deckHighlightActive;
   document.querySelectorAll('.card-border-wrap').forEach(card => {
     const id = card.getAttribute('data-card-id');
-    card.classList.remove('highlighted-deck-card');
-    if (savedDeck[id]) {
+    if (deckHighlightActive && savedDeck[id]) {
       card.classList.add('highlighted-deck-card');
+    } else {
+      card.classList.remove('highlighted-deck-card');
     }
   });
 }
 
-// Optional hookup: document.getElementById('myDeckButton').addEventListener('click', highlightMyDeck);
+// 🔘 Hook up button toggle
+document.getElementById('myDeckButton')?.addEventListener('click', highlightMyDeck);
