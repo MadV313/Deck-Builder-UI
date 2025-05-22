@@ -33,8 +33,8 @@
   { "card_id": "113", "name": "Spiked Log Trap", "type": "Trap", "image": "113_SpikedLogTrap_Trap.png", "Card Rarity": "Common", "Rarity Color": "Gray" },
   { "card_id": "114", "name": "Explosive Grenade Trap", "type": "Trap", "image": "114_ExplosiveGrenadeTrap_Trap.png", "Card Rarity": "Common", "Rarity Color": "Gray" },
 
-  { "card_id": "123", "name": "Jakub Nowak", "type": "Specialty", "image": "123_JakubNowak_Specialty.png", "Card Rarity": "Legendary", "Rarity Color": "Gold" },
-  { "card_id": "126", "name": "Lt. Col. Emil Boren", "type": "Specialty", "image": "126_Lt.Col.EmilBoren_Specialty.png", "Card Rarity": "Legendary", "Rarity Color": "Gold" },
+  { "card_id": "123", "name": "Jakub Nowak", "type": "Legendary", "image": "123_JakubNowak_Specialty.png", "Card Rarity": "Legendary", "Rarity Color": "Gold" },
+  { "card_id": "126", "name": "Lt. Col. Emil Boren", "type": "Legendary", "image": "126_Lt.Col.EmilBoren_Specialty.png", "Card Rarity": "Legendary", "Rarity Color": "Gold" },
 
   { "card_id": "029-DUP", "name": "Longhorn", "type": "Attack", "image": "029_Longhorn_Attack.png", "Card Rarity": "Rare", "Rarity Color": "Purple" },
   { "card_id": "050-DUP", "name": "Military Boots", "type": "Defense", "image": "050_MilitaryBoots_Defense.png", "Card Rarity": "Common", "Rarity Color": "Gray" },
