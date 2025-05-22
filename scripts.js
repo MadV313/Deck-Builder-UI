@@ -66,12 +66,12 @@ function loadSavedDeckOnly() {
   sortedDeckIds.forEach(id => {
     const cardData = cardDataMap[id];
     if (cardData) {
-      createCard(cardData, savedDeck[id], true);
+      createCard(cardData, savedDeck[id], true, true); // ✅ highlight = true, nonInteractive = true
     }
   });
 }
 
-function createCard(cardData, countOverride = null, highlight = false) {
+function createCard(cardData, countOverride = null, highlight = false, nonInteractive = false) {
   const id = String(cardData.card_id);
   const borderWrap = document.createElement('div');
   borderWrap.className = 'card-border-wrap';
@@ -96,9 +96,11 @@ function createCard(cardData, countOverride = null, highlight = false) {
   card.appendChild(badge);
   borderWrap.appendChild(card);
 
-  borderWrap.addEventListener('click', () =>
-    toggleCard(borderWrap, id, cardData.type, cardData.quantity)
-  );
+  if (!nonInteractive) {
+    borderWrap.addEventListener('click', () =>
+      toggleCard(borderWrap, id, cardData.type, cardData.quantity)
+    );
+  }
 
   deckContainer.appendChild(borderWrap);
 }
