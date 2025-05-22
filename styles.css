@@ -68,18 +68,15 @@ body {
   50% { transform: scale(1.1); }
   100% { transform: scale(1); }
 }
-
 .deck-summary.pulse {
   animation: pulse 0.4s;
 }
 
-/* ❌ Red flash when trying to exceed max */
+/* ❌ Red flash + shake when exceeding max deck */
 .card-border-wrap.limit-reached {
   border-color: red !important;
   box-shadow: 0 0 8px 3px red !important;
 }
-
-/* 💢 Shake animation */
 @keyframes shake {
   0% { transform: translateX(0); }
   25% { transform: translateX(-4px); }
@@ -99,7 +96,7 @@ body {
   margin-bottom: 40px;
 }
 
-/* 🔲 Outer wrapper: shows rarity border */
+/* 🔲 Rarity wrapper */
 .card-border-wrap {
   padding: 3px;
   border: 3px solid gray;
@@ -116,7 +113,7 @@ body {
   border-color: limegreen !important;
 }
 
-/* Inner card layout */
+/* Card layout */
 .card {
   width: 140px;
   height: 210px;
@@ -144,21 +141,18 @@ button {
   cursor: pointer;
   border-radius: 6px;
 }
-
 button.disabled {
   background-color: gray;
 }
-
 button.animate {
   animation: glow 1s infinite alternate;
 }
-
 @keyframes glow {
   from { box-shadow: 0 0 8px teal; }
   to { box-shadow: 0 0 24px teal; }
 }
 
-/* 🔗 Back to Hub button */
+/* 🔗 Back to Hub */
 .back-to-hub {
   position: fixed;
   top: 15px;
@@ -174,17 +168,16 @@ button.animate {
   z-index: 1100;
   transition: background-color 0.3s ease, transform 0.2s ease;
 }
-
 .back-to-hub:hover {
   background-color: rgba(0, 128, 128, 0.9);
   transform: scale(1.05);
 }
 
-/* ✅ Mobile view: zoomed out background + better position */
+/* 📱 Mobile background + card layout */
 @media (max-width: 768px) {
   body {
     background-size: 250% !important;
-    background-position: 80% top !important; /* Show more of the right side */
+    background-position: 80% top !important;
     background-repeat: no-repeat !important;
   }
 }
@@ -203,6 +196,48 @@ button.animate {
   z-index: 10;
 }
 
-/* 📱 Mobile card layout adjustments */
+/* ✅ 3-wide layout for mobile */
 @media (max-width: 1200px) {
-  .deck-contain
+  .deck-container {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    justify-items: center;
+    gap: 18px;
+    padding: 5px;
+    box-sizing: border-box;
+  }
+
+  .card-border-wrap {
+    width: 280px;
+    height: 375px;
+    padding: 5px;
+  }
+
+  .card {
+    width: 100%;
+    height: 100%;
+    padding: 0;
+    border: 2px solid #1b1b1b;
+    border-radius: 6px;
+    background-color: transparent;
+    overflow: hidden;
+    position: relative;
+    text-align: center;
+  }
+
+  .card img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+  }
+
+  button {
+    padding: 22px 38px;
+    font-size: 24px;
+  }
+
+  .back-to-hub {
+    font-size: 22px;
+    padding: 18px 30px;
+  }
+}
