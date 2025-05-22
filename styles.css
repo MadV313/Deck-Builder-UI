@@ -147,6 +147,26 @@ button.animate {
   to { box-shadow: 0 0 24px teal; }
 }
 
+/* 📦 My Deck Button Styling */
+#myDeckButton {
+  background-color: gray;
+  border: none;
+  padding: 14px 28px;
+  color: white;
+  font-size: 18px;
+  font-weight: bold;
+  cursor: pointer;
+  border-radius: 6px;
+  transition: all 0.2s ease-in-out;
+}
+#myDeckButton.animate {
+  animation: glow 1s infinite alternate;
+}
+#myDeckButton.disabled {
+  background-color: #777;
+  cursor: not-allowed;
+}
+
 .back-to-hub {
   position: fixed;
   top: 15px;
