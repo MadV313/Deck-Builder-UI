@@ -18,6 +18,7 @@ const deckSummary = document.querySelector('.deck-summary');
 
 let cardDataMap = {};
 const useMockMode = true;
+let savedDeck = {};
 
 const dataSource = useMockMode
   ? fetch('mock_deckData.json').then(res => res.json())
@@ -88,7 +89,6 @@ function toggleCard(borderWrap, rawId, type, ownedQuantity) {
 
   if (totalCardsNow >= 40 && currentSelected === 0) {
     borderWrap.classList.add('limit-reached', 'shake');
-
     if (isMobile && navigator.vibrate) navigator.vibrate([200]);
 
     setTimeout(() => borderWrap.classList.remove('shake'), 400);
@@ -174,6 +174,8 @@ function saveDeck() {
     return;
   }
 
+  savedDeck = { ...currentDeck }; // 🔒 Save copy
+
   const cards = document.querySelectorAll('.card-border-wrap');
   cards.forEach(card => {
     card.classList.add('slide-out-left');
@@ -230,3 +232,16 @@ function confirmWipe() {
     validateDeck();
   }
 }
+
+// 📌 Highlight My Deck button logic
+function highlightMyDeck() {
+  document.querySelectorAll('.card-border-wrap').forEach(card => {
+    const id = card.getAttribute('data-card-id');
+    card.classList.remove('highlighted-deck-card');
+    if (savedDeck[id]) {
+      card.classList.add('highlighted-deck-card');
+    }
+  });
+}
+
+// Optional hookup: document.getElementById('myDeckButton').addEventListener('click', highlightMyDeck);
