@@ -46,14 +46,36 @@ dataSource.then(cards => {
     }
   });
 
-  const sortedCards = Object.values(grouped).sort((a, b) => parseInt(a.card_id) - parseInt(b.card_id));
-  sortedCards.forEach(cardData => createCard(cardData));
+  cardDataMap = Object.values(grouped).reduce((map, c) => {
+    map[c.card_id] = c;
+    return map;
+  }, {});
+
+  loadAllCards();
 });
 
-function createCard(cardData) {
+function loadAllCards() {
+  deckContainer.innerHTML = '';
+  const sorted = Object.values(cardDataMap).sort((a, b) => parseInt(a.card_id) - parseInt(b.card_id));
+  sorted.forEach(card => createCard(card, card.quantity));
+}
+
+function loadSavedDeckOnly() {
+  deckContainer.innerHTML = '';
+  const sortedDeckIds = Object.keys(savedDeck).sort((a, b) => parseInt(a) - parseInt(b));
+  sortedDeckIds.forEach(id => {
+    const cardData = cardDataMap[id];
+    if (cardData) {
+      createCard(cardData, savedDeck[id], true);
+    }
+  });
+}
+
+function createCard(cardData, countOverride = null, highlight = false) {
   const id = String(cardData.card_id);
   const borderWrap = document.createElement('div');
   borderWrap.className = 'card-border-wrap';
+  if (highlight) borderWrap.classList.add('highlighted-deck-card');
   borderWrap.setAttribute('data-card-id', id);
   borderWrap.setAttribute('data-quantity', cardData.quantity);
 
@@ -67,7 +89,7 @@ function createCard(cardData) {
 
   const badge = document.createElement('div');
   badge.className = 'quantity-badge';
-  badge.innerText = `x${cardData.quantity}`;
+  badge.innerText = `x${countOverride ?? cardData.quantity}`;
   badge.id = `badge-${id}`;
 
   card.appendChild(img);
@@ -79,7 +101,6 @@ function createCard(cardData) {
   );
 
   deckContainer.appendChild(borderWrap);
-  cardDataMap[id] = cardData;
 }
 
 function toggleCard(borderWrap, rawId, type, ownedQuantity) {
@@ -184,7 +205,6 @@ function saveDeck() {
   const isMobile = /Mobi|Android/i.test(navigator.userAgent);
   const shuffleDelay = isMobile ? 600 : 0;
 
-  // Prevent scroll clipping during animation
   document.body.style.overflow = 'hidden';
 
   setTimeout(() => {
@@ -214,19 +234,17 @@ function saveDeck() {
       pile.classList.add('slide-up');
 
       setTimeout(() => {
-        // Re-enable scrolling and repopulate deck cleanly
         requestAnimationFrame(() => {
           document.body.style.overflow = '';
           deckContainer.innerHTML = '';
           currentDeck = {};
           Object.keys(typeCount).forEach(key => typeCount[key] = 0);
-          Object.values(cardDataMap).forEach(createCard);
+          loadSavedDeckOnly();
           updateDeckSummary();
           validateDeck();
         });
       }, 1200);
     }, 4000 + shuffleDelay);
-
   }, 600);
 }
 
@@ -234,9 +252,7 @@ function confirmWipe() {
   if (confirm('Are you sure you want to wipe your deck?')) {
     currentDeck = {};
     Object.keys(typeCount).forEach(key => typeCount[key] = 0);
-    document.querySelectorAll('.card-border-wrap').forEach(card => {
-      card.classList.remove('selected-card', 'limit-reached');
-    });
+    loadAllCards();
     updateDeckSummary();
     validateDeck();
   }
