@@ -227,3 +227,10 @@ button.animate {
   border-radius: 8px;
   z-index: 10;
 }
+
+@media (max-width: 768px) {
+  body {
+    background-size: 200%; /* Zoomed out */
+    background-position: center top; /* Optional: shift upward if needed */
+  }
+}
