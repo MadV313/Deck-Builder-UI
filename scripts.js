@@ -184,6 +184,9 @@ function saveDeck() {
   const isMobile = /Mobi|Android/i.test(navigator.userAgent);
   const shuffleDelay = isMobile ? 600 : 0;
 
+  // Prevent scroll clipping during animation
+  document.body.style.overflow = 'hidden';
+
   setTimeout(() => {
     deckContainer.innerHTML = '';
 
@@ -211,13 +214,17 @@ function saveDeck() {
       pile.classList.add('slide-up');
 
       setTimeout(() => {
-        deckContainer.innerHTML = '';
-        currentDeck = {};
-        Object.keys(typeCount).forEach(key => typeCount[key] = 0);
-        Object.values(cardDataMap).forEach(createCard);
-        updateDeckSummary();
-        validateDeck();
-      }, 1000);
+        // Re-enable scrolling and repopulate deck cleanly
+        requestAnimationFrame(() => {
+          document.body.style.overflow = '';
+          deckContainer.innerHTML = '';
+          currentDeck = {};
+          Object.keys(typeCount).forEach(key => typeCount[key] = 0);
+          Object.values(cardDataMap).forEach(createCard);
+          updateDeckSummary();
+          validateDeck();
+        });
+      }, 1200);
     }, 4000 + shuffleDelay);
 
   }, 600);
