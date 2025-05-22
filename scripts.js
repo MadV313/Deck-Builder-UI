@@ -86,9 +86,9 @@ function toggleCard(borderWrap, rawId, type, ownedQuantity) {
 
   const isMobile = /Mobi|Android/i.test(navigator.userAgent);
 
-  // Max deck enforcement BEFORE prompt
   if (totalCardsNow >= 40 && currentSelected === 0) {
     borderWrap.classList.add('limit-reached', 'shake');
+
     if (isMobile && navigator.vibrate) navigator.vibrate([200]);
 
     setTimeout(() => borderWrap.classList.remove('shake'), 400);
@@ -179,6 +179,9 @@ function saveDeck() {
     card.classList.add('slide-out-left');
   });
 
+  const isMobile = /Mobi|Android/i.test(navigator.userAgent);
+  const shuffleDelay = isMobile ? 300 : 0;
+
   setTimeout(() => {
     deckContainer.innerHTML = '';
 
@@ -190,7 +193,7 @@ function saveDeck() {
       const shuffleCard = document.createElement('img');
       shuffleCard.src = 'images/cards/000_CardBack_Unique.png';
       shuffleCard.className = 'shuffle-card';
-      shuffleCard.style.animationDelay = `${i * 0.15}s`;
+      shuffleCard.style.animationDelay = `${i * 0.15 + shuffleDelay / 1000}s`;
       pile.appendChild(shuffleCard);
     }
 
@@ -199,11 +202,20 @@ function saveDeck() {
     toast.innerText = '✅ Deck Saved!';
     document.body.appendChild(toast);
 
-    setTimeout(() => toast.classList.add('show'), 1800);
+    setTimeout(() => {
+      toast.classList.add('show');
+    }, 1800 + shuffleDelay);
+
     setTimeout(() => {
       toast.classList.remove('show');
       toast.remove();
-    }, 4000);
+      pile.classList.add('slide-up');
+
+      setTimeout(() => {
+        location.reload();
+      }, 1000);
+    }, 4000 + shuffleDelay);
+
   }, 600);
 }
 
