@@ -9,6 +9,8 @@ let typeCount = {
   "Legendary": 0
 };
 
+const useLocalStorage = true; // ✅ Toggle this off for live backend
+
 const deckContainer = document.getElementById('deckContainer');
 const saveButton = document.getElementById('saveButton');
 const saveButtonBottom = document.getElementById('saveButtonBottom');
@@ -20,6 +22,14 @@ let cardDataMap = {};
 const useMockMode = true;
 let savedDeck = {};
 let deckHighlightActive = false;
+
+// 🔁 Load deck from localStorage if enabled
+if (useLocalStorage) {
+  const storedDeck = localStorage.getItem('savedDeck');
+  if (storedDeck) {
+    savedDeck = JSON.parse(storedDeck);
+  }
+}
 
 const dataSource = useMockMode
   ? fetch('mock_deckData.json').then(res => res.json())
@@ -176,6 +186,9 @@ function saveDeck() {
   }
 
   savedDeck = { ...currentDeck };
+  if (useLocalStorage) {
+    localStorage.setItem('savedDeck', JSON.stringify(savedDeck));
+  }
 
   const cards = document.querySelectorAll('.card-border-wrap');
   cards.forEach(card => {
@@ -234,7 +247,6 @@ function confirmWipe() {
   }
 }
 
-// 📌 Toggle highlight on My Deck
 function highlightMyDeck() {
   deckHighlightActive = !deckHighlightActive;
   document.querySelectorAll('.card-border-wrap').forEach(card => {
@@ -247,5 +259,4 @@ function highlightMyDeck() {
   });
 }
 
-// 🔘 Hook up button toggle
 document.getElementById('myDeckButton')?.addEventListener('click', highlightMyDeck);
