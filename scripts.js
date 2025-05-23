@@ -66,7 +66,7 @@ function loadSavedDeckOnly() {
   sortedDeckIds.forEach(id => {
     const cardData = cardDataMap[id];
     if (cardData) {
-      createCard(cardData, savedDeck[id], true, true); // ✅ highlight = true, nonInteractive = true
+      createCard(cardData, savedDeck[id], true, true);
     }
   });
 }
@@ -196,6 +196,13 @@ function saveDeck() {
     return;
   }
 
+  const savedString = JSON.stringify(savedDeck);
+  const currentString = JSON.stringify(currentDeck);
+  if (savedString === currentString) {
+    alert("✅ Deck already saved.");
+    return;
+  }
+
   savedDeck = { ...currentDeck };
   if (useLocalStorage) {
     localStorage.setItem('savedDeck', JSON.stringify(savedDeck));
@@ -261,13 +268,16 @@ function confirmWipe() {
 }
 
 function highlightMyDeck() {
-  deckHighlightActive = !deckHighlightActive;
+  if (deckHighlightActive) {
+    alert("📘 Currently viewing saved deck.");
+    return;
+  }
+
+  deckHighlightActive = true;
   document.querySelectorAll('.card-border-wrap').forEach(card => {
     const id = card.getAttribute('data-card-id');
-    if (deckHighlightActive && savedDeck[id]) {
+    if (savedDeck[id]) {
       card.classList.add('highlighted-deck-card');
-    } else {
-      card.classList.remove('highlighted-deck-card');
     }
   });
 }
