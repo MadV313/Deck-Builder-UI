@@ -216,7 +216,7 @@ function saveDeck() {
     pile.className = 'deck-pile';
     deckContainer.appendChild(pile);
 
-    for (let i = 0; i < 12; i++) {
+    for (let i = 0; i < 7; i++) {
       const shuffleCard = document.createElement('img');
       shuffleCard.src = 'images/cards/000_CardBack_Unique.png';
       shuffleCard.className = 'shuffle-card';
