@@ -249,7 +249,7 @@ button.animate {
   }
 
   .shuffle-card {
-    animation-duration: 0.8s !important;
+    animation-duration: 1s !important;
   }
 }
 
