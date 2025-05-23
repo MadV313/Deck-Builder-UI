@@ -178,9 +178,14 @@ button.animate {
   z-index: 1100;
   transition: background-color 0.3s ease, transform 0.2s ease;
 }
+
+/* ✅ Unified Hover for All Buttons */
+button:hover,
+#myDeckButton:hover,
 .back-to-hub:hover {
-  background-color: rgba(0, 128, 128, 0.9);
-  transform: scale(1.05);
+  border-color: #00ffff;
+  transform: scale(1.02);
+  box-shadow: 0 0 10px #00ffff;
 }
 
 @media (max-width: 768px) {
