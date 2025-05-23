@@ -25,7 +25,7 @@ body {
   opacity: 0.2;
 }
 
-.header {
+.header, .footer {
   background-color: rgba(0, 0, 0, 0);
   display: flex;
   flex-direction: column;
@@ -37,14 +37,6 @@ body {
 }
 
 .footer {
-  background-color: rgba(0, 0, 0, 0);
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  gap: 10px;
-  padding: 15px;
-  width: 100%;
   margin-top: auto;
 }
 
@@ -70,19 +62,20 @@ body {
   animation: pulse 0.4s;
 }
 
+/* ✅ Universal red warning + shake */
 .card-border-wrap.limit-reached {
-  border-color: red !important;
-  box-shadow: 0 0 8px 3px red !important;
+  border: 3px solid red !important;
+  box-shadow: 0 0 10px 3px red !important;
 }
-@keyframes shake {
+.shake {
+  animation: shakeAnim 0.4s ease;
+}
+@keyframes shakeAnim {
   0% { transform: translateX(0); }
   25% { transform: translateX(-4px); }
   50% { transform: translateX(4px); }
   75% { transform: translateX(-4px); }
   100% { transform: translateX(0); }
-}
-.shake {
-  animation: shake 0.4s ease;
 }
 
 .deck-container {
@@ -103,11 +96,14 @@ body {
   margin: 10px;
 }
 
-/* 🟩 Selected or My Deck Highlight */
-.card-border-wrap.selected-card,
-.card-border-wrap.highlighted-deck-card {
+/* 🟩 Green selected & gold highlighted */
+.card-border-wrap.selected-card {
   box-shadow: 0 0 12px 3px limegreen;
   border-color: limegreen !important;
+}
+.card-border-wrap.highlighted-deck-card {
+  box-shadow: 0 0 14px 3px gold;
+  border-color: gold !important;
 }
 
 .card {
@@ -147,7 +143,7 @@ button.animate {
   to { box-shadow: 0 0 24px teal; }
 }
 
-/* 📦 My Deck Button Styling */
+/* 📦 My Deck Button */
 #myDeckButton {
   background-color: gray;
   border: none;
