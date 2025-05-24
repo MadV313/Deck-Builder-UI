@@ -219,6 +219,11 @@ button:hover,
     box-sizing: border-box;
   }
 
+    #myDeckButton {
+    padding: 22px 38px;
+    font-size: 24px;
+  }
+
   .card-border-wrap {
     width: 280px;
     height: 375px;
