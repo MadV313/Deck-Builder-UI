@@ -147,13 +147,15 @@ button.animate {
 #myDeckButton {
   background-color: gray;
   border: none;
-  padding: 14px 28px;
+  padding: 22px 38px;
   color: white;
-  font-size: 18px;
-  font-weight: bold;
+  font-size: 24px;
+  font-weight: bold; /* Ensures same boldness */
+  line-height: 1.2;   /* Matches visual height if needed */
   cursor: pointer;
   border-radius: 6px;
   transition: all 0.2s ease-in-out;
+  box-sizing: border-box; /* Ensures padding behaves the same */
 }
 #myDeckButton.animate {
   animation: glow 1s infinite alternate;
