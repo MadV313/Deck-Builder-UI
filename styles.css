@@ -147,15 +147,15 @@ button.animate {
 #myDeckButton {
   background-color: gray;
   border: none;
-  padding: 22px 38px;
   color: white;
-  font-size: 24px;
-  font-weight: bold; /* Ensures same boldness */
-  line-height: 1.2;   /* Matches visual height if needed */
+  font-size: 18px;
+  font-weight: bold;
+  line-height: 1.2;
   cursor: pointer;
   border-radius: 6px;
   transition: all 0.2s ease-in-out;
-  box-sizing: border-box; /* Ensures padding behaves the same */
+  box-sizing: border-box;
+  padding: 14px 28px; /* Match standard button size */
 }
 #myDeckButton.animate {
   animation: glow 1s infinite alternate;
@@ -219,11 +219,6 @@ button:hover,
     gap: 18px;
     padding: 5px;
     box-sizing: border-box;
-  }
-
-    #myDeckButton {
-    padding: 22px 38px;
-    font-size: 24px;
   }
 
   .card-border-wrap {
