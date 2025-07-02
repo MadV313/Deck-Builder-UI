@@ -144,23 +144,23 @@ button.animate {
 }
 
 /* 📦 My Deck Button */
-#myDeckButton {
+.my-deck-button {
   background-color: gray;
   border: none;
   color: white;
   font-size: 18px;
   font-weight: bold;
-  line-height: 1.2;
+  line-height: normal;
   cursor: pointer;
   border-radius: 6px;
   transition: all 0.2s ease-in-out;
   box-sizing: border-box;
-  padding: 14px 28px; /* Match standard button size */
+  padding: 14px 28px;
 }
-#myDeckButton.animate {
+.my-deck-button.animate {
   animation: glow 1s infinite alternate;
 }
-#myDeckButton.disabled {
+.my-deck-button.disabled {
   background-color: #777;
   cursor: not-allowed;
 }
