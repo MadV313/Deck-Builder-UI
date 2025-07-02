@@ -225,7 +225,8 @@ button:hover,
     object-fit: cover;
   }
 
-  button {
+  button,
+  .my-deck-button {
     padding: 22px 38px;
     font-size: 24px;
   }
