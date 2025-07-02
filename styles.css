@@ -122,7 +122,8 @@ body {
   object-fit: cover;
 }
 
-button {
+button,
+.my-deck-button {
   background-color: teal;
   border: none;
   padding: 14px 28px;
@@ -132,6 +133,7 @@ button {
   cursor: pointer;
   border-radius: 6px;
 }
+
 button.disabled {
   background-color: gray;
 }
@@ -141,28 +143,6 @@ button.animate {
 @keyframes glow {
   from { box-shadow: 0 0 8px teal; }
   to { box-shadow: 0 0 24px teal; }
-}
-
-/* 📦 My Deck Button */
-.my-deck-button {
-  background-color: gray;
-  border: none;
-  color: white;
-  font-size: 18px;
-  font-weight: bold;
-  line-height: normal;
-  cursor: pointer;
-  border-radius: 6px;
-  transition: all 0.2s ease-in-out;
-  box-sizing: border-box;
-  padding: 14px 28px;
-}
-.my-deck-button.animate {
-  animation: glow 1s infinite alternate;
-}
-.my-deck-button.disabled {
-  background-color: #777;
-  cursor: not-allowed;
 }
 
 .back-to-hub {
