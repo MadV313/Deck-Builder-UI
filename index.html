@@ -5,13 +5,37 @@
   <title>Deck Builder UI</title>
   <link rel="stylesheet" href="styles.css?v=1.1">
   <script src="scripts.js" defer></script>
+
+  <!-- Small, local styles for the audio toggle only -->
+  <style>
+    .audio-toggle {
+      position: fixed;
+      left: 16px;
+      bottom: 16px;
+      z-index: 9999;
+      background: rgba(0,0,0,0.65);
+      color: #fff;
+      border: 1px solid #00ffff;
+      border-radius: 999px;
+      padding: 8px 12px;
+      font-size: 12px;
+      cursor: pointer;
+      user-select: none;
+      backdrop-filter: blur(2px);
+    }
+    .audio-toggle:hover { box-shadow: 0 0 10px #00ffff; }
+  </style>
 </head>
 <body>
   <!-- ❄️ Snow Effect -->
   <div class="snow"></div>
 
+  <!-- 🔊 Background Music -->
+  <audio id="bg-audio" src="audio/bg/Follow the Trail.mp3" loop preload="auto"></audio>
+  <button id="audio-toggle" class="audio-toggle">🔇 Music Off</button>
+
   <!-- 🔗 Back to Hub Button -->
-  <a href="https://madv313.github.io/HUB-UI/" class="back-to-hub">← Back to Hub</a>
+  <a href="https://madv313.github.io/HUB-UI/" class="back-to-hub" id="backToHub">← Back to Hub</a>
 
   <!-- 🔝 Header -->
   <div class="header">
@@ -35,5 +59,70 @@
     <button onclick="confirmWipe()">Wipe Deck</button>
     <button onclick="highlightMyDeck()" class="my-deck-button disabled">My Deck</button>
   </div>
+
+  <!-- Lightweight inline bootstrapping for audio + Back to Hub param propagation -->
+  <script>
+    (function () {
+      const qs = new URLSearchParams(location.search);
+      const TOKEN   = qs.get('token') || '';
+      const API     = (qs.get('api') || '').replace(/\/+$/,'');
+      const hubLink = document.getElementById('backToHub');
+
+      // Propagate token/api to Back to Hub link
+      if (hubLink) {
+        try {
+          const u = new URL(hubLink.href);
+          if (TOKEN) u.searchParams.set('token', TOKEN);
+          if (API)   u.searchParams.set('api', API);
+          hubLink.href = u.toString();
+        } catch {
+          // Fallback if original href is relative
+          let base = hubLink.getAttribute('href') || 'https://madv313.github.io/HUB-UI/';
+          const parts = [];
+          if (TOKEN) parts.push(`token=${encodeURIComponent(TOKEN)}`);
+          if (API)   parts.push(`api=${encodeURIComponent(API)}`);
+          const sep = base.includes('?') ? '&' : '?';
+          hubLink.setAttribute('href', parts.length ? `${base}${sep}${parts.join('&')}` : base);
+        }
+      }
+
+      // Background music init
+      const audio = document.getElementById('bg-audio');
+      const toggle = document.getElementById('audio-toggle');
+      if (!audio || !toggle) return;
+
+      // Restore persisted mute preference; default is NOT muted
+      const saved = localStorage.getItem('bgMuted');
+      audio.muted = saved === null ? false : saved === 'true';
+      toggle.textContent = audio.muted ? '🔇 Music Off' : '🔊 Music On';
+
+      // Try to start playback
+      const tryPlay = () => audio.play().catch(() => {/* ignored */});
+      tryPlay();
+
+      // First user gesture: if still muted, unmute & play
+      const unlock = () => {
+        if (audio.muted) {
+          audio.muted = false;
+          localStorage.setItem('bgMuted', 'false');
+          toggle.textContent = '🔊 Music On';
+          tryPlay();
+        }
+        // Remove after first interaction
+        window.removeEventListener('pointerdown', unlock, { passive: true });
+        window.removeEventListener('keydown', unlock);
+      };
+      window.addEventListener('pointerdown', unlock, { passive: true });
+      window.addEventListener('keydown', unlock);
+
+      // Manual toggle
+      toggle.addEventListener('click', () => {
+        audio.muted = !audio.muted;
+        localStorage.setItem('bgMuted', audio.muted ? 'true' : 'false');
+        toggle.textContent = audio.muted ? '🔇 Music Off' : '🔊 Music On';
+        if (!audio.muted) tryPlay();
+      });
+    })();
+  </script>
 </body>
 </html>
