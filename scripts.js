@@ -11,18 +11,28 @@ let typeCount = {
 
 const useLocalStorage = true;
 
-const deckContainer = document.getElementById('deckContainer');
-const saveButton = document.getElementById('saveButton');
-const saveButtonBottom = document.getElementById('saveButtonBottom');
-const totalCardsDisplay = document.getElementById('totalCards');
-const typeBreakdownDisplay = document.getElementById('typeBreakdown');
-const deckSummary = document.querySelector('.deck-summary');
+// -------------------- URL params & API config --------------------
+const qs       = new URLSearchParams(location.search);
+const TOKEN    = qs.get("token") || "";
+const UID      = qs.get("uid")   || "";
+const API_BASE = (qs.get("api") || "").replace(/\/+$/, "");
+
+// Prefer real data; mock only if explicitly forced via ?mock=1
+const useMockMode = qs.get("mock") === "1";
+
+// -------------------- DOM refs --------------------
+const deckContainer       = document.getElementById('deckContainer');
+const saveButton          = document.getElementById('saveButton');
+const saveButtonBottom    = document.getElementById('saveButtonBottom');
+const totalCardsDisplay   = document.getElementById('totalCards');
+const typeBreakdownDisplay= document.getElementById('typeBreakdown');
+const deckSummary         = document.querySelector('.deck-summary');
 
 let cardDataMap = {};
-const useMockMode = true;
-let savedDeck = {};
+let savedDeck   = {};
 let deckHighlightActive = false;
 
+// -------------------- Persisted deck (optional) --------------------
 if (useLocalStorage) {
   const storedDeck = localStorage.getItem('savedDeck');
   if (storedDeck) {
@@ -30,30 +40,167 @@ if (useLocalStorage) {
   }
 }
 
-const dataSource = useMockMode
-  ? fetch('mock_deckData.json').then(res => res.json())
-  : fetch('deckData.json').then(res => res.json());
+// -------------------- Fetch helpers --------------------
+async function fetchJSON(url) {
+  try {
+    const r = await fetch(url, { cache: "no-store" });
+    if (!r.ok) throw new Error(`${r.status} ${r.statusText}`);
+    return await r.json();
+  } catch (e) {
+    console.warn(`[deckbuilder] fetch failed ${url}: ${e?.message || e}`);
+    return null;
+  }
+}
 
-dataSource.then(cards => {
-  const grouped = {};
-  cards.forEach(card => {
-    const rawId = String(card.card_id);
-    const baseId = rawId.replace(/-DUP\d*$/, '').replace(/-DUP$/, '');
-    if (!grouped[baseId]) {
-      grouped[baseId] = { ...card, card_id: baseId, quantity: 1 };
-    } else {
-      grouped[baseId].quantity += 1;
+function pad3(n) { return String(n).padStart(3, "0"); }
+function safe(s="") {
+  return String(s)
+    .normalize("NFKD")
+    .replace(/\s+/g, "_")
+    .replace(/[^a-zA-Z0-9._-]/g, "")
+    .replace(/_+/g, "_")
+    .replace(/^_+|_+$/g, "");
+}
+
+// Try to load master list (for names/types/rarity/filenames)
+async function loadMaster() {
+  const localCandidates = [
+    "logic/CoreMasterReference.json",
+    "data/CoreMasterReference.json",
+    "CoreMasterReference.json"
+  ];
+  for (const p of localCandidates) {
+    const m = await fetchJSON(p);
+    if (Array.isArray(m) && m.length) return normalizeMaster(m);
+  }
+  if (API_BASE) {
+    const apiCandidates = [
+      `${API_BASE}/logic/CoreMasterReference.json`,
+      `${API_BASE}/CoreMasterReference.json`
+    ];
+    for (const p of apiCandidates) {
+      const m = await fetchJSON(p);
+      if (Array.isArray(m) && m.length) return normalizeMaster(m);
     }
+  }
+  // GitHub fallbacks
+  const fallbacks = [
+    "https://madv313.github.io/Card-Collection-UI/logic/CoreMasterReference.json",
+    "https://madv313.github.io/Duel-Bot/logic/CoreMasterReference.json",
+    "https://raw.githubusercontent.com/MadV313/Duel-Bot/main/logic/CoreMasterReference.json"
+  ];
+  for (const u of fallbacks) {
+    const m = await fetchJSON(u);
+    if (Array.isArray(m) && m.length) return normalizeMaster(m);
+  }
+  // Minimal stub if all else fails
+  return Array.from({ length: 127 }, (_, i) => {
+    const id = pad3(i + 1);
+    return { card_id: id, name: `Card ${id}`, type: "Unknown", rarity: "Common", image: `${id}_Card_Unknown.png` };
   });
+}
 
-  cardDataMap = Object.values(grouped).reduce((map, c) => {
-    map[c.card_id] = c;
+function normalizeMaster(master) {
+  return master
+    .map(c => {
+      const id     = pad3(c.card_id ?? c.number ?? c.id);
+      const image  = c.image || c.filename || `${id}_${safe(c.name || "Card")}_${safe(c.type || "Unknown")}.png`;
+      const name   = c.name || `Card ${id}`;
+      const type   = c.type || "Unknown";
+      const rarity = c.rarity || "Common";
+      return { ...c, card_id: id, image, name, type, rarity };
+    })
+    .filter(c => c.card_id !== "000")
+    .sort((a,b) => (parseInt(a.card_id)||0) - (parseInt(b.card_id)||0));
+}
+
+// Convert any backend shape into { [###]: qty }
+function toOwnedMap(data) {
+  const map = {};
+  if (!data) return map;
+
+  // Array of rows with counts
+  if (Array.isArray(data)) {
+    for (const row of data) {
+      const id  = pad3(row.number ?? row.card_id ?? row.id);
+      const qty = Number(row.owned ?? row.quantity ?? 0);
+      if (!id || !Number.isFinite(qty)) continue;
+      map[id] = (map[id] || 0) + qty;
+    }
     return map;
-  }, {});
+  }
 
+  // Map shape
+  if (typeof data === "object") {
+    for (const [k, v] of Object.entries(data)) {
+      const id  = pad3(k);
+      const qty = Number(v);
+      if (Number.isFinite(qty)) map[id] = qty;
+    }
+  }
+  return map;
+}
+
+// Load ownership (prefers API + token)
+async function loadOwnership() {
+  if (!useMockMode && API_BASE && TOKEN) {
+    // Preferred routes
+    let d = await fetchJSON(`${API_BASE}/me/${encodeURIComponent(TOKEN)}/collection`);
+    if (d) return toOwnedMap(d);
+    d = await fetchJSON(`${API_BASE}/collection?token=${encodeURIComponent(TOKEN)}`);
+    if (d) return toOwnedMap(d);
+  }
+  if (!useMockMode && API_BASE && UID) {
+    const d = await fetchJSON(`${API_BASE}/collection?userId=${encodeURIComponent(UID)}`);
+    if (d) return toOwnedMap(d);
+  }
+
+  // Local fallbacks (legacy)
+  const localPrimary = await fetchJSON("deckData.json");
+  if (localPrimary) return toOwnedMap(localPrimary);
+
+  if (useMockMode) {
+    const mock = await fetchJSON("mock_deckData.json");
+    if (mock) {
+      // mock is typically a list with duplicates; collapse to counts
+      const map = {};
+      mock.forEach(c => {
+        const id = String(c.card_id).replace(/-DUP\d*$/, '').replace(/-DUP$/, '');
+        if (!id) return;
+        const id3 = pad3(id);
+        map[id3] = (map[id3] || 0) + 1;
+      });
+      return map;
+    }
+  }
+
+  // Final fallback: empty (no owned cards)
+  return {};
+}
+
+// -------------------- Data bootstrap --------------------
+(async function init() {
+  const [master, ownedMap] = await Promise.all([loadMaster(), loadOwnership()]);
+
+  // Build the map the UI expects: only show cards you own (qty > 0)
+  // and attach the filename/rarity/type for rendering/filters already used by the UI.
+  cardDataMap = {};
+  for (const m of master) {
+    const qty = Number(ownedMap[m.card_id] || 0);
+    if (qty > 0) {
+      cardDataMap[m.card_id] = {
+        ...m,
+        quantity: qty,       // how many owned
+        image: m.image       // filename used by current UI
+      };
+    }
+  }
+
+  // If nothing owned came back, keep the grid empty (same behavior the deck builder had when no data).
   loadAllCards();
-});
+})();
 
+// -------------------- Rendering (unchanged) --------------------
 function loadAllCards() {
   deckContainer.innerHTML = '';
   const sorted = Object.values(cardDataMap).sort((a, b) => parseInt(a.card_id) - parseInt(b.card_id));
@@ -105,6 +252,7 @@ function createCard(cardData, countOverride = null, highlight = false, nonIntera
   deckContainer.appendChild(borderWrap);
 }
 
+// -------------------- Interactions (unchanged) --------------------
 function toggleCard(borderWrap, rawId, type, ownedQuantity) {
   const id = rawId.replace(/-DUP\d*$/, '').replace(/-DUP$/, '');
   borderWrap.classList.remove('limit-reached', 'shake');
