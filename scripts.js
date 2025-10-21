@@ -52,6 +52,56 @@ async function fetchJSON(url) {
   }
 }
 
+
+// -------------------- API helpers for deck persistence --------------------
+async function apiGetDeck() {
+  if (!API_BASE || !TOKEN) return null;
+  const url = `${API_BASE}/me/${encodeURIComponent(TOKEN)}/deck`;
+  return await fetchJSON(url);
+}
+
+async function apiPutDeck(deckName, deckMap) {
+  if (!API_BASE || !TOKEN) return { ok:false, error:"Missing API/TOKEN" };
+  const url = `${API_BASE}/me/${encodeURIComponent(TOKEN)}/deck`;
+  const cards = Object.entries(deckMap)
+    .map(([id, qty]) => ({ id, qty: Number(qty)||0 }))
+    .filter(c => c.qty > 0)
+    .sort((a,b) => parseInt(a.id) - parseInt(b.id));
+  const body = { name: deckName || "My Deck", cards };
+  try {
+    const r = await fetch(url, {
+      method: "PUT",
+      headers: { "Content-Type":"application/json", "Cache-Control":"no-store" },
+      body: JSON.stringify(body)
+    });
+    const j = await r.json().catch(() => ({ ok:false, error:"Bad JSON" }));
+    if (!r.ok || j?.ok === false) {
+      const msg = j?.error || `${r.status} ${r.statusText}`;
+      return { ok:false, error: msg, details: j?.details||null };
+    }
+    return j;
+  } catch (e) {
+    return { ok:false, error: e?.message || String(e) };
+  }
+}
+
+async function apiDeleteDeck() {
+  if (!API_BASE || !TOKEN) return { ok:false, error:"Missing API/TOKEN" };
+  const url = `${API_BASE}/me/${encodeURIComponent(TOKEN)}/deck`;
+  try {
+    const r = await fetch(url, { method: "DELETE", headers: { "Cache-Control":"no-store" } });
+    const j = await r.json().catch(() => ({ ok:false, error:"Bad JSON" }));
+    if (!r.ok || j?.ok === false) {
+      const msg = j?.error || `${r.status} ${r.statusText}`;
+      return { ok:false, error: msg };
+    }
+    return j;
+  } catch (e) {
+    return { ok:false, error: e?.message || String(e) };
+  }
+}
+
+
 function pad3(n) { return String(n).padStart(3, "0"); }
 function safe(s="") {
   return String(s)
@@ -196,7 +246,24 @@ async function loadOwnership() {
     }
   }
 
-  // If nothing owned came back, keep the grid empty (same behavior the deck builder had when no data).
+  // Try to fetch previously saved deck to enable "My Deck" button & highlighting
+  try {
+    if (API_BASE && TOKEN) {
+      const resp = await apiGetDeck();
+      if (resp && resp.ok && resp.deck && Array.isArray(resp.deck.cards)) {
+        savedDeck = {};
+        for (const c of resp.deck.cards) {
+          const cid = /^\d+$/.test(String(c.id)) ? pad3(Number(c.id)) : String(c.id).padStart(3,'0');
+          savedDeck[cid] = Number(c.qty)||0;
+        }
+        const myBtn = document.querySelector('.my-deck-button');
+        if (myBtn) myBtn.classList.remove('disabled');
+      }
+    }
+  } catch (e) {
+    console.warn('[deckbuilder] init: failed to fetch saved deck', e);
+  }
+  // Build initial grid (owned cards)
   loadAllCards();
 })();
 
@@ -352,6 +419,19 @@ function saveDeck() {
   }
 
   savedDeck = { ...currentDeck };
+  // Persist remotely if API/TOKEN provided
+  if (API_BASE && TOKEN) {
+    try {
+      const res = await apiPutDeck('My Deck', savedDeck);
+      if (!res?.ok) {
+        alert(`❌ Failed to save deck: ${res?.error || 'Unknown error'}`);
+        return;
+      }
+    } catch (e) {
+      alert(`❌ Failed to save deck: ${e?.message || e}`);
+      return;
+    }
+  }
   if (useLocalStorage) {
     localStorage.setItem('savedDeck', JSON.stringify(savedDeck));
   }
@@ -407,6 +487,19 @@ function saveDeck() {
 
 function confirmWipe() {
   if (confirm('Are you sure you want to wipe your deck?')) {
+    // Try remote wipe first
+    if (API_BASE && TOKEN) {
+      try {
+        const res = await apiDeleteDeck();
+        if (!res?.ok) {
+          alert(`❌ Failed to wipe deck on server: ${res?.error || 'Unknown error'}`);
+          return;
+        }
+      } catch (e) {
+        alert(`❌ Failed to wipe deck on server: ${e?.message || e}`);
+        return;
+      }
+    }
     currentDeck = {};
     Object.keys(typeCount).forEach(key => typeCount[key] = 0);
     loadAllCards();
