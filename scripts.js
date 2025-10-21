@@ -18,6 +18,9 @@ const TOKEN     = RAW_TOKEN.trim().replace(/^=+/, ""); // strip any leading '='
 const UID       = qs.get("uid")   || "";
 const API_BASE  = (qs.get("api") || "").replace(/\/+$/, "");
 
+// Prefer real data; mock only if explicitly forced via ?mock=1
+const useMockMode = (qs.get("mock") || "0") === "1";
+
 // -------------------- DOM refs --------------------
 const deckContainer       = document.getElementById('deckContainer');
 const saveButton          = document.getElementById('saveButton');
