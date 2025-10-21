@@ -32,6 +32,81 @@ let cardDataMap = {};
 let savedDeck   = {};
 let deckHighlightActive = false;
 
+// -------------------- Toasts (Frosty Blue Glow) --------------------
+(function ensureToastStyles(){
+  if (document.getElementById('frosty-toast-styles')) return;
+  const css = `
+  .toast-container{
+    position:fixed; right:16px; top:16px; z-index:99999; display:flex; flex-direction:column; gap:10px;
+    pointer-events:none;
+  }
+  .toast{
+    pointer-events:auto;
+    min-width: 260px; max-width: 420px;
+    background: rgba(5, 15, 25, 0.78);
+    color:#e9faff; border:1px solid rgba(0,255,255,0.35);
+    box-shadow: 0 0 18px rgba(0, 255, 255, 0.25), inset 0 0 12px rgba(0, 180, 200, 0.15);
+    backdrop-filter: blur(6px);
+    border-radius:14px; padding:12px 14px; font: 500 14px/1.25 system-ui, -apple-system, Segoe UI, Roboto, Arial;
+    display:flex; align-items:flex-start; gap:10px; opacity:0; transform: translateY(-8px);
+    transition: opacity .25s ease, transform .25s ease;
+  }
+  .toast.show{ opacity:1; transform: translateY(0); }
+  .toast .icon{
+    margin-top:2px; filter: drop-shadow(0 0 6px rgba(150,240,255,0.5));
+  }
+  .toast.success{ border-color: rgba(0,255,255,0.5); }
+  .toast.info{ border-color: rgba(120,220,255,0.5); }
+  .toast.warning{ border-color: rgba(255,235,140,0.55); }
+  .toast.error{
+    border-color: rgba(255,140,160,0.55);
+    box-shadow: 0 0 20px rgba(255,130,160,0.2), inset 0 0 12px rgba(180,0,40,0.15);
+  }
+  .toast .msg{ white-space:pre-wrap; }
+  `;
+  const style = document.createElement('style');
+  style.id = 'frosty-toast-styles';
+  style.textContent = css;
+  document.head.appendChild(style);
+})();
+
+function showToast(message, type = 'info', duration = 3000) {
+  let container = document.querySelector('.toast-container');
+  if (!container) {
+    container = document.createElement('div');
+    container.className = 'toast-container';
+    document.body.appendChild(container);
+  }
+  const el = document.createElement('div');
+  el.className = `toast ${type}`;
+  const icon = document.createElement('div');
+  icon.className = 'icon';
+  icon.textContent = (type === 'success') ? '❄️' :
+                     (type === 'warning') ? '⚠️' :
+                     (type === 'error')   ? '✖️' : '✨';
+  const msg = document.createElement('div');
+  msg.className = 'msg';
+  msg.textContent = message;
+
+  el.appendChild(icon);
+  el.appendChild(msg);
+  container.appendChild(el);
+  requestAnimationFrame(() => el.classList.add('show'));
+
+  const ttl = Math.max(1800, duration|0);
+  const timer = setTimeout(() => {
+    el.classList.remove('show');
+    setTimeout(() => el.remove(), 250);
+  }, ttl);
+
+  // allow click to dismiss quickly
+  el.addEventListener('click', () => {
+    clearTimeout(timer);
+    el.classList.remove('show');
+    setTimeout(() => el.remove(), 200);
+  });
+}
+
 // -------------------- Persisted deck (optional) --------------------
 if (useLocalStorage) {
   const storedDeck = localStorage.getItem('savedDeck');
@@ -380,7 +455,7 @@ function showWarning(borderWrap, isMobile, message) {
   borderWrap.classList.add('limit-reached', 'shake');
   if (isMobile && navigator.vibrate) navigator.vibrate([200]);
   setTimeout(() => borderWrap.classList.remove('limit-reached', 'shake'), 600);
-  alert(message);
+  showToast(message, 'warning', 3000);
 }
 
 function updateDeckSummary() {
@@ -407,14 +482,14 @@ function validateDeck() {
 function saveDeck() {
   const total = Object.values(currentDeck).reduce((sum, qty) => sum + qty, 0);
   if (total < 20 || total > 40) {
-    alert('Deck must be between 20 and 40 cards.');
+    showToast('Deck must be between 20 and 40 cards.', 'error', 3500);
     return;
   }
 
   const savedString = JSON.stringify(savedDeck);
   const currentString = JSON.stringify(currentDeck);
   if (savedString === currentString) {
-    alert("✅ Deck already saved.");
+    showToast("✅ Deck already saved.", 'info', 2200);
     return;
   }
 
@@ -424,11 +499,11 @@ function saveDeck() {
     try {
       const res = await apiPutDeck('My Deck', savedDeck);
       if (!res?.ok) {
-        alert(`❌ Failed to save deck: ${res?.error || 'Unknown error'}`);
+        showToast(`Failed to save deck: ${res?.error || 'Unknown error'}`, 'error', 4000);
         return;
       }
     } catch (e) {
-      alert(`❌ Failed to save deck: ${e?.message || e}`);
+      showToast(`Failed to save deck: ${e?.message || e}`, 'error', 4000);
       return;
     }
   }
@@ -492,11 +567,11 @@ function confirmWipe() {
       try {
         const res = await apiDeleteDeck();
         if (!res?.ok) {
-          alert(`❌ Failed to wipe deck on server: ${res?.error || 'Unknown error'}`);
+          showToast(`Failed to wipe deck on server: ${res?.error || 'Unknown error'}`, 'error', 4000);
           return;
         }
       } catch (e) {
-        alert(`❌ Failed to wipe deck on server: ${e?.message || e}`);
+        showToast(`Failed to wipe deck on server: ${e?.message || e}`, 'error', 4000);
         return;
       }
     }
@@ -505,12 +580,13 @@ function confirmWipe() {
     loadAllCards();
     updateDeckSummary();
     validateDeck();
+    showToast('🧊 Deck wiped.', 'success', 2200);
   }
 }
 
 function highlightMyDeck() {
   if (deckHighlightActive) {
-    alert("📘 Currently viewing saved deck.");
+    showToast("📘 Currently viewing saved deck.", 'info', 2000);
     return;
   }
 
