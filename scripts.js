@@ -479,7 +479,7 @@ function validateDeck() {
   });
 }
 
-function saveDeck() {
+async function saveDeck() {  // <-- made async
   const total = Object.values(currentDeck).reduce((sum, qty) => sum + qty, 0);
   if (total < 20 || total > 40) {
     showToast('Deck must be between 20 and 40 cards.', 'error', 3500);
@@ -560,7 +560,7 @@ function saveDeck() {
   }, 600);
 }
 
-function confirmWipe() {
+async function confirmWipe() {  // <-- made async
   if (confirm('Are you sure you want to wipe your deck?')) {
     // Try remote wipe first
     if (API_BASE && TOKEN) {
