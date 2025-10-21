@@ -12,13 +12,11 @@ let typeCount = {
 const useLocalStorage = true;
 
 // -------------------- URL params & API config --------------------
-const qs       = new URLSearchParams(location.search);
-const TOKEN    = qs.get("token") || "";
-const UID      = qs.get("uid")   || "";
-const API_BASE = (qs.get("api") || "").replace(/\/+$/, "");
-
-// Prefer real data; mock only if explicitly forced via ?mock=1
-const useMockMode = qs.get("mock") === "1";
+const qs        = new URLSearchParams(location.search);
+const RAW_TOKEN = qs.get("token") || "";
+const TOKEN     = RAW_TOKEN.trim().replace(/^=+/, ""); // strip any leading '='
+const UID       = qs.get("uid")   || "";
+const API_BASE  = (qs.get("api") || "").replace(/\/+$/, "");
 
 // -------------------- DOM refs --------------------
 const deckContainer       = document.getElementById('deckContainer');
