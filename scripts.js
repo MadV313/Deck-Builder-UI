@@ -146,7 +146,7 @@ async function apiPutDeck(deckName, deckMap) {
   try {
     const r = await fetch(url, {
       method: "PUT",
-      headers: { "Content-Type":"application/json" }, // CORS-safe
+      headers: { "Content-Type":"application/json" }, // removed Cache-Control (CORS)
       body: JSON.stringify(body)
     });
     const j = await r.json().catch(() => ({ ok:false, error:"Bad JSON" }));
@@ -164,7 +164,7 @@ async function apiDeleteDeck() {
   if (!API_BASE || !TOKEN) return { ok:false, error:"Missing API/TOKEN" };
   const url = `${API_BASE}/me/${encodeURIComponent(TOKEN)}/deck`;
   try {
-    const r = await fetch(url, { method: "DELETE" }); // CORS-safe
+    const r = await fetch(url, { method: "DELETE" }); // removed Cache-Control (CORS)
     const j = await r.json().catch(() => ({ ok:false, error:"Bad JSON" }));
     if (!r.ok || j?.ok === false) {
       const msg = j?.error || `${r.status} ${r.statusText}`;
@@ -175,6 +175,7 @@ async function apiDeleteDeck() {
     return { ok:false, error: e?.message || String(e) };
   }
 }
+
 
 function pad3(n) { return String(n).padStart(3, "0"); }
 function safe(s="") {
@@ -228,13 +229,10 @@ function normalizeMaster(master) {
   return master
     .map(c => {
       const id     = pad3(c.card_id ?? c.number ?? c.id);
+      const image  = c.image || c.filename || `${id}_${safe(c.name || "Card")}_${safe(c.type || "Unknown")}.png`;
       const name   = c.name || `Card ${id}`;
       const type   = c.type || "Unknown";
       const rarity = c.rarity || "Common";
-
-      // Always use the sanitized underscore image naming convention so URLs match your repo files
-      const image  = `${id}_${safe(name)}_${safe(type)}.png`;
-
       return { ...c, card_id: id, image, name, type, rarity };
     })
     .filter(c => c.card_id !== "000")
@@ -481,7 +479,7 @@ function validateDeck() {
   });
 }
 
-async function saveDeck() {
+async function saveDeck() {  // async retained for await
   const total = Object.values(currentDeck).reduce((sum, qty) => sum + qty, 0);
   if (total < 20 || total > 40) {
     showToast('Deck must be between 20 and 40 cards.', 'error', 3500);
@@ -562,7 +560,7 @@ async function saveDeck() {
   }, 600);
 }
 
-async function confirmWipe() {
+async function confirmWipe() {  // async retained for await
   if (confirm('Are you sure you want to wipe your deck?')) {
     // Try remote wipe first
     if (API_BASE && TOKEN) {
