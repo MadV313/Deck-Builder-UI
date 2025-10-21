@@ -1,0 +1,8 @@
+Deck Builder UI — Persistence Wiring (Save/Wipe/My Deck)
+
+- Added API helpers: apiGetDeck, apiPutDeck, apiDeleteDeck using `${API_BASE}/me/:token/deck` endpoints.
+- init(): now fetches saved deck from backend (if `api` & `token` query params present) and enables the "My Deck" button.
+- saveDeck(): validates 20–40, then persists to backend via PUT before running the existing animation & localStorage save.
+- confirmWipe(): calls DELETE to wipe remote deck; only after success does it clear UI and local state.
+- No visual changes to HTML/CSS; buttons are the same (Save Deck / Wipe Deck / My Deck).
+- Ownership loading already prefers `${API_BASE}/me/:token/collection` (existing code retained).
